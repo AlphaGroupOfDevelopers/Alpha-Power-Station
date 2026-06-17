@@ -7,15 +7,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// CMS Admin Users
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // hashed with bcrypt
+  name      String
+  role      String   @default("editor") // admin, editor, viewer
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
 model Project {
   id              String   @id @default(uuid())
+  slug            String   @unique
   title           String
   description     String
   category        String   // foundational, commercial, infrastructure
   division        String   // AGD, AGEE, integrated
   imageUrl        String?
   technicalDetails String?
+  methodology     String?  @db.Text
+  results         String?  @db.Text
+  challenges      String?  @db.Text
+  gallery         String[] // Array of image URLs
   status          String   @default("active") // active, completed, planning
+  featured        Boolean  @default(false)
+  publishedAt     DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -27,12 +49,35 @@ model TeamMember {
   name      String
   role      String
   division  String   // AGD, AGEE
-  bio       String?
+  bio       String?  @db.Text
   imageUrl  String?
+  email     String?
+  linkedin  String?
+  github    String?
+  order     Int      @default(0) // Display order
+  featured  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("team_members")
+}
+
+model NewsPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String   @db.Text
+  coverImage  String?
+  category    String   // news, insight, event
+  author      String
+  tags        String[]
+  featured    Boolean  @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("news_posts")
 }
 
 model StudentApplication {
@@ -42,10 +87,18 @@ model StudentApplication {
   email      String   @unique
   phone      String
   university String?
+  program    String?
+  yearOfStudy String?
   division   String   // AGD, AGEE
+  primaryInterest String?
   resume     String?  // URL to uploaded resume
-  coverLetter String?
+  coverLetter String?  @db.Text
+  githubUrl  String?
+  portfolioUrl String?
+  whyApply   String?  @db.Text
   status     String   @default("pending") // pending, reviewed, accepted, rejected
+  reviewNotes String? @db.Text
+  reviewedAt DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -57,11 +110,70 @@ model ContactInquiry {
   name      String
   email     String
   subject   String
-  message   String
+  message   String   @db.Text
   type      String   @default("general") // general, partnership, media
   status    String   @default("new") // new, responded, closed
+  response  String?  @db.Text
+  respondedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("contact_inquiries")
+}
+
+model Partner {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  logoUrl     String?
+  website     String?
+  category    String   // university, industry, government, ngo
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("partners")
+}
+
+model MediaAsset {
+  id          String   @id @default(uuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int      // bytes
+  url         String
+  thumbnail   String?
+  folder      String?  @default("general")
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+
+  @@map("media_assets")
+}
+
+model SiteContent {
+  id        String   @id @default(uuid())
+  key       String   @unique // e.g., "homepage_hero_title"
+  value     String   // Content value
+  type      String   @default("text") // text, html, json
+  section   String   // homepage, about, faq
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_content")
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  division  String   // AGD, AGEE
+  content   String
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonials")
 }
