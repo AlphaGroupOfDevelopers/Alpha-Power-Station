@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  category        String   // foundational, commercial, infrastructure
+  division        String   // AGD, AGEE, integrated
+  imageUrl        String?
+  technicalDetails String?
+  status          String   @default("active") // active, completed, planning
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  division  String   // AGD, AGEE
+  bio       String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+model StudentApplication {
+  id         String   @id @default(uuid())
+  firstName  String
+  lastName   String
+  email      String   @unique
+  phone      String
+  university String?
+  division   String   // AGD, AGEE
+  resume     String?  // URL to uploaded resume
+  coverLetter String?
+  status     String   @default("pending") // pending, reviewed, accepted, rejected
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("student_applications")
+}
+
+model ContactInquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  type      String   @default("general") // general, partnership, media
+  status    String   @default("new") // new, responded, closed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contact_inquiries")
+}
