@@ -58,9 +58,52 @@ export default function ApplyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Submit to backend API
-    console.log('Application submitted:', formData);
-    alert('Application submitted successfully! You will receive a confirmation email shortly.');
+    
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      
+      const response = await fetch(`${API_URL}/students/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit application');
+      }
+
+      const data = await response.json();
+      console.log('Application submitted:', data);
+      
+      alert('Application submitted successfully! You will receive a confirmation email shortly.');
+      
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        university: '',
+        program: '',
+        yearOfStudy: '',
+        expectedGraduation: '',
+        division: '',
+        primaryInterest: '',
+        secondaryInterest: '',
+        relevantCourses: '',
+        projects: '',
+        githubUrl: '',
+        portfolioUrl: '',
+        whyApply: '',
+        whatContribute: '',
+        availability: '',
+      });
+      setCurrentStep(1);
+    } catch (error: any) {
+      console.error('Error submitting application:', error);
+      alert(error.message || 'Failed to submit application. Please try again.');
+    }
   };
 
   return (

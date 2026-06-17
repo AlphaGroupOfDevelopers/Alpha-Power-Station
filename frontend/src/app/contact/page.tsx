@@ -28,16 +28,27 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call (in production, this would call the backend API)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
       
-      // In production, send to backend:
-      // const response = await fetch('/api/contact', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ...formData, inquiryType: selectedType }),
-      // });
+      const response = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          type: selectedType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit contact form');
+      }
+
+      const data = await response.json();
+      console.log('Contact inquiry submitted:', data);
       
       setSubmitStatus('success');
       setFormData({
@@ -49,6 +60,7 @@ export default function ContactPage() {
         message: '',
       });
     } catch (error) {
+      console.error('Error submitting contact form:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
