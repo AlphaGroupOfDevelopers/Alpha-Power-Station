@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
   try {
     const { status, category, division, featured } = req.query;
 
-    const projects = await prisma.project.findMany({
+    const projects = await prisma.projects.findMany({
       where: {
         ...(status && { status: status as string }),
         ...(category && { category: category as string }),
@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
 // Get single project
 router.get('/:id', async (req, res) => {
   try {
-    const project = await prisma.project.findUnique({
+    const project = await prisma.projects.findUnique({
       where: { id: req.params.id },
     });
 
@@ -68,7 +68,7 @@ router.post(
 
     try {
       // Check if slug exists
-      const existing = await prisma.project.findUnique({
+      const existing = await prisma.projects.findUnique({
         where: { slug: req.body.slug },
       });
 
@@ -76,7 +76,7 @@ router.post(
         return res.status(409).json({ error: 'Project with this slug already exists' });
       }
 
-      const project = await prisma.project.create({
+      const project = await prisma.projects.create({
         data: req.body,
       });
 
@@ -97,7 +97,7 @@ router.put(
   requireRole('admin', 'editor'),
   async (req, res) => {
     try {
-      const project = await prisma.project.update({
+      const project = await prisma.projects.update({
         where: { id: req.params.id },
         data: req.body,
       });
@@ -119,7 +119,7 @@ router.delete(
   requireRole('admin'),
   async (req, res) => {
     try {
-      await prisma.project.delete({
+      await prisma.projects.delete({
         where: { id: req.params.id },
       });
 
@@ -139,7 +139,7 @@ router.patch(
     try {
       const { publish } = req.body;
 
-      const project = await prisma.project.update({
+      const project = await prisma.projects.update({
         where: { id: req.params.id },
         data: {
           publishedAt: publish ? new Date() : null,

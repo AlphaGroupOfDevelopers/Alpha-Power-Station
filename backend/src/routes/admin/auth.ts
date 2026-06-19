@@ -32,7 +32,7 @@ router.post(
       const { email, password, name, role } = req.body;
 
       // Check if user exists
-      const existingUser = await prisma.adminUser.findUnique({
+      const existingUser = await prisma.admin_users.findUnique({
         where: { email },
       });
 
@@ -44,7 +44,7 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Create user
-      const user = await prisma.adminUser.create({
+      const user = await prisma.admin_users.create({
         data: {
           email,
           password: hashedPassword,
@@ -88,7 +88,7 @@ router.post(
       const { email, password } = req.body;
 
       // Find user
-      const user = await prisma.adminUser.findUnique({
+      const user = await prisma.admin_users.findUnique({
         where: { email },
       });
 
@@ -103,7 +103,7 @@ router.post(
       }
 
       // Update last login
-      await prisma.adminUser.update({
+      await prisma.admin_users.update({
         where: { id: user.id },
         data: { lastLogin: new Date() },
       });
@@ -124,6 +124,7 @@ router.post(
       });
 
       res.json({
+        success: true,
         message: 'Login successful',
         token,
         user: {
@@ -149,7 +150,7 @@ router.post('/logout', (req, res) => {
 // Get current user
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const user = await prisma.adminUser.findUnique({
+    const user = await prisma.admin_users.findUnique({
       where: { id: req.user?.userId },
       select: {
         id: true,
@@ -190,7 +191,7 @@ router.post(
       const { currentPassword, newPassword } = req.body;
 
       // Get user
-      const user = await prisma.adminUser.findUnique({
+      const user = await prisma.admin_users.findUnique({
         where: { id: req.user?.userId },
       });
 
@@ -208,7 +209,7 @@ router.post(
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       // Update password
-      await prisma.adminUser.update({
+      await prisma.admin_users.update({
         where: { id: user.id },
         data: { password: hashedPassword },
       });

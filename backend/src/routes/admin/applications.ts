@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   try {
     const { status, division } = req.query;
 
-    const applications = await prisma.studentApplication.findMany({
+    const applications = await prisma.student_applications.findMany({
       where: {
         ...(status && { status: status as string }),
         ...(division && { division: division as string }),
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     });
 
     // Get stats
-    const stats = await prisma.studentApplication.groupBy({
+    const stats = await prisma.student_applications.groupBy({
       by: ['status'],
       _count: true,
     });
@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
 // Get single application
 router.get('/:id', async (req, res) => {
   try {
-    const application = await prisma.studentApplication.findUnique({
+    const application = await prisma.student_applications.findUnique({
       where: { id: req.params.id },
     });
 
@@ -62,7 +62,7 @@ router.patch(
     try {
       const { status, reviewNotes } = req.body;
 
-      const application = await prisma.studentApplication.update({
+      const application = await prisma.student_applications.update({
         where: { id: req.params.id },
         data: {
           status,
@@ -88,7 +88,7 @@ router.delete(
   requireRole('admin'),
   async (req, res) => {
     try {
-      await prisma.studentApplication.delete({
+      await prisma.student_applications.delete({
         where: { id: req.params.id },
       });
 
@@ -105,7 +105,7 @@ router.get('/contact/inquiries', async (req, res) => {
   try {
     const { status, type } = req.query;
 
-    const inquiries = await prisma.contactInquiry.findMany({
+    const inquiries = await prisma.contact_inquiries.findMany({
       where: {
         ...(status && { status: status as string }),
         ...(type && { type: type as string }),
@@ -128,7 +128,7 @@ router.patch(
     try {
       const { status, response } = req.body;
 
-      const inquiry = await prisma.contactInquiry.update({
+      const inquiry = await prisma.contact_inquiries.update({
         where: { id: req.params.id },
         data: {
           status,

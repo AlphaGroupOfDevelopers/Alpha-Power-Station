@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   try {
     const { category, featured } = req.query;
 
-    const posts = await prisma.newsPost.findMany({
+    const posts = await prisma.news_posts.findMany({
       where: {
         ...(category && { category: category as string }),
         ...(featured && { featured: featured === 'true' }),
@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
 // Get single news post
 router.get('/:id', async (req, res) => {
   try {
-    const post = await prisma.newsPost.findUnique({
+    const post = await prisma.news_posts.findUnique({
       where: { id: req.params.id },
     });
 
@@ -65,7 +65,7 @@ router.post(
     }
 
     try {
-      const existing = await prisma.newsPost.findUnique({
+      const existing = await prisma.news_posts.findUnique({
         where: { slug: req.body.slug },
       });
 
@@ -73,7 +73,7 @@ router.post(
         return res.status(409).json({ error: 'News post with this slug already exists' });
       }
 
-      const post = await prisma.newsPost.create({
+      const post = await prisma.news_posts.create({
         data: req.body,
       });
 
@@ -94,7 +94,7 @@ router.put(
   requireRole('admin', 'editor'),
   async (req, res) => {
     try {
-      const post = await prisma.newsPost.update({
+      const post = await prisma.news_posts.update({
         where: { id: req.params.id },
         data: req.body,
       });
@@ -116,7 +116,7 @@ router.delete(
   requireRole('admin'),
   async (req, res) => {
     try {
-      await prisma.newsPost.delete({
+      await prisma.news_posts.delete({
         where: { id: req.params.id },
       });
 
@@ -136,7 +136,7 @@ router.patch(
     try {
       const { publish } = req.body;
 
-      const post = await prisma.newsPost.update({
+      const post = await prisma.news_posts.update({
         where: { id: req.params.id },
         data: {
           publishedAt: publish ? new Date() : null,

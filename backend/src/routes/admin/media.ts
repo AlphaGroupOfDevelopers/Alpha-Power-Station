@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
   try {
     const { folder } = req.query;
 
-    const assets = await prisma.mediaAsset.findMany({
+    const assets = await prisma.media_assets.findMany({
       where: {
         ...(folder && { folder: folder as string }),
       },
@@ -61,7 +61,7 @@ router.post(
       }
 
       // Save to database
-      const asset = await prisma.mediaAsset.create({
+      const asset = await prisma.media_assets.create({
         data: {
           filename: file.filename,
           originalName: file.originalname,
@@ -115,7 +115,7 @@ router.post(
           thumbnail = `/uploads/${thumbnailFilename}`;
         }
 
-        const asset = await prisma.mediaAsset.create({
+        const asset = await prisma.media_assets.create({
           data: {
             filename: file.filename,
             originalName: file.originalname,
@@ -148,7 +148,7 @@ router.delete(
   requireRole('admin', 'editor'),
   async (req, res) => {
     try {
-      const asset = await prisma.mediaAsset.findUnique({
+      const asset = await prisma.media_assets.findUnique({
         where: { id: req.params.id },
       });
 
@@ -170,7 +170,7 @@ router.delete(
       }
 
       // Delete from database
-      await prisma.mediaAsset.delete({
+      await prisma.media_assets.delete({
         where: { id: req.params.id },
       });
 

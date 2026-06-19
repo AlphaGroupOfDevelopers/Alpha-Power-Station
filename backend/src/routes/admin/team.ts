@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   try {
     const { division, featured } = req.query;
 
-    const members = await prisma.teamMember.findMany({
+    const members = await prisma.team_members.findMany({
       where: {
         ...(division && { division: division as string }),
         ...(featured && { featured: featured === 'true' }),
@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
 // Get single team member
 router.get('/:id', async (req, res) => {
   try {
-    const member = await prisma.teamMember.findUnique({
+    const member = await prisma.team_members.findUnique({
       where: { id: req.params.id },
     });
 
@@ -62,7 +62,7 @@ router.post(
     }
 
     try {
-      const member = await prisma.teamMember.create({
+      const member = await prisma.team_members.create({
         data: req.body,
       });
 
@@ -83,7 +83,7 @@ router.put(
   requireRole('admin', 'editor'),
   async (req, res) => {
     try {
-      const member = await prisma.teamMember.update({
+      const member = await prisma.team_members.update({
         where: { id: req.params.id },
         data: req.body,
       });
@@ -105,7 +105,7 @@ router.delete(
   requireRole('admin'),
   async (req, res) => {
     try {
-      await prisma.teamMember.delete({
+      await prisma.team_members.delete({
         where: { id: req.params.id },
       });
 

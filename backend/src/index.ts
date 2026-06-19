@@ -12,12 +12,14 @@ import studentRoutes from './routes/students';
 import contactRoutes from './routes/contact';
 
 // Admin routes
-import adminAuthRoutes from './routes/admin/auth';
+import adminAuthRoutes from './routes/admin/auth-verbose';
 import adminProjectRoutes from './routes/admin/projects';
 import adminNewsRoutes from './routes/admin/news';
 import adminTeamRoutes from './routes/admin/team';
 import adminMediaRoutes from './routes/admin/media';
 import adminApplicationRoutes from './routes/admin/applications';
+import adminInquiryRoutes from './routes/admin/inquiries';
+import adminPartnerRoutes from './routes/admin/partners';
 
 dotenv.config();
 
@@ -40,15 +42,29 @@ app.use('/api/', limiter);
 // Stricter rate limit for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 50, // Increased from 5 to 50 for development
   message: 'Too many login attempts, please try again later.'
 });
 app.use('/api/admin/auth/login', authLimiter);
 
 // CORS
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
 }));
 
 // Body parsers
@@ -71,6 +87,8 @@ app.use('/api/admin/news', adminNewsRoutes);
 app.use('/api/admin/team', adminTeamRoutes);
 app.use('/api/admin/media', adminMediaRoutes);
 app.use('/api/admin/applications', adminApplicationRoutes);
+app.use('/api/admin/inquiries', adminInquiryRoutes);
+app.use('/api/admin/partners', adminPartnerRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -93,7 +111,12 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 app.listen(PORT, () => {
+  console.log('\n' + '='.repeat(60));
   console.log(`🚀 Alpha Power Station API running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔐 CMS Admin: http://localhost:${PORT}/api/admin`);
+  console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'PostgreSQL (Prisma Cloud)' : 'SQLite'}`);
+  console.log(`🌐 CORS Origins: ${process.env.ALLOWED_ORIGINS || 'http://localhost:3000'}`);
+  console.log('='.repeat(60));
+  console.log('\n✓ Server ready - Verbose logging enabled\n');
 });
