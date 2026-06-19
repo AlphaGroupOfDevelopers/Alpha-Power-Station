@@ -1,15 +1,15 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // GET all projects
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { category, division, status } = req.query;
     
-    const projects = await prisma.project.findMany({
+    const projects = await prisma.projects.findMany({
       where: {
         ...(category && { category: category as string }),
         ...(division && { division: division as string }),
@@ -25,9 +25,9 @@ router.get('/', async (req, res) => {
 });
 
 // GET single project
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const project = await prisma.project.findUnique({
+    const project = await prisma.projects.findUnique({
       where: { id: req.params.id },
     });
 
@@ -42,9 +42,9 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST create project (admin only - add auth middleware later)
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
-    const project = await prisma.project.create({
+    const project = await prisma.projects.create({
       data: req.body,
     });
 

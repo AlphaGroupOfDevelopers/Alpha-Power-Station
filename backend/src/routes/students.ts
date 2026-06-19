@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
 
@@ -15,7 +15,7 @@ router.post(
     body('phone').trim().notEmpty().withMessage('Phone number is required'),
     body('division').isIn(['AGD', 'AGEE']).withMessage('Invalid division'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -23,7 +23,7 @@ router.post(
 
     try {
       // Check if email already exists
-      const existing = await prisma.studentApplication.findUnique({
+      const existing = await prisma.student_applications.findUnique({
         where: { email: req.body.email },
       });
 
@@ -31,7 +31,7 @@ router.post(
         return res.status(409).json({ error: 'Application with this email already exists' });
       }
 
-      const application = await prisma.studentApplication.create({
+      const application = await prisma.student_applications.create({
         data: req.body,
       });
 
@@ -46,11 +46,11 @@ router.post(
 );
 
 // GET all applications (admin only - add auth middleware later)
-router.get('/applications', async (req, res) => {
+router.get('/applications', async (req: Request, res: Response) => {
   try {
     const { status, division } = req.query;
     
-    const applications = await prisma.studentApplication.findMany({
+    const applications = await prisma.student_applications.findMany({
       where: {
         ...(status && { status: status as string }),
         ...(division && { division: division as string }),

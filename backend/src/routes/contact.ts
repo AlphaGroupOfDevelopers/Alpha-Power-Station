@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
 
@@ -15,14 +15,14 @@ router.post(
     body('message').trim().notEmpty().withMessage('Message is required'),
     body('type').optional().isIn(['general', 'partnership', 'media']),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
     try {
-      const inquiry = await prisma.contactInquiry.create({
+      const inquiry = await prisma.contact_inquiries.create({
         data: req.body,
       });
 
@@ -37,11 +37,11 @@ router.post(
 );
 
 // GET all inquiries (admin only - add auth middleware later)
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, type } = req.query;
     
-    const inquiries = await prisma.contactInquiry.findMany({
+    const inquiries = await prisma.contact_inquiries.findMany({
       where: {
         ...(status && { status: status as string }),
         ...(type && { type: type as string }),
