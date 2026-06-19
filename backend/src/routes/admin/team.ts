@@ -55,7 +55,7 @@ router.post(
     body('role').trim().notEmpty().withMessage('Role is required'),
     body('division').isIn(['AGD', 'AGEE']).withMessage('Invalid division'),
   ],
-  async (req, res) => {
+  async (req: any, res: any) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
