@@ -346,9 +346,12 @@ export default function ApplyPage() {
                         value={formData.primaryInterest}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                        disabled={!formData.division}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                       >
-                        <option value="">Select...</option>
+                        <option value="">
+                          {!formData.division ? 'Please select a division first' : 'Select...'}
+                        </option>
                         {formData.division === 'AGD' && (
                           <>
                             <option value="embedded">Embedded Systems</option>
@@ -368,6 +371,11 @@ export default function ApplyPage() {
                           </>
                         )}
                       </select>
+                      {!formData.division && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Select a division above to see available interests
+                        </p>
+                      )}
                     </div>
 
                     <div>
