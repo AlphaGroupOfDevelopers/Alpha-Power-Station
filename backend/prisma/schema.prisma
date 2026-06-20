@@ -20,7 +20,7 @@ model admin_users {
 }
 
 model contact_inquiries {
-  id          String    @id
+  id          String    @id @default(uuid())
   name        String
   email       String
   subject     String
@@ -28,13 +28,13 @@ model contact_inquiries {
   type        String    @default("general")
   status      String    @default("new")
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime  @updatedAt
   respondedAt DateTime?
   response    String?
 }
 
 model media_assets {
-  id           String   @id
+  id           String   @id @default(uuid())
   filename     String
   originalName String
   mimeType     String
@@ -47,7 +47,7 @@ model media_assets {
 }
 
 model news_posts {
-  id          String    @id
+  id          String    @id @default(uuid())
   slug        String    @unique
   title       String
   excerpt     String
@@ -59,11 +59,11 @@ model news_posts {
   featured    Boolean   @default(false)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime  @updatedAt
 }
 
 model partners {
-  id          String   @id
+  id          String   @id @default(uuid())
   name        String
   description String?
   logoUrl     String?
@@ -72,11 +72,11 @@ model partners {
   featured    Boolean  @default(false)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime @updatedAt
 }
 
 model projects {
-  id               String    @id
+  id               String    @id @default(uuid())
   title            String
   description      String
   category         String
@@ -85,7 +85,7 @@ model projects {
   technicalDetails String?
   status           String    @default("active")
   createdAt        DateTime  @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime  @updatedAt
   challenges       String?
   featured         Boolean   @default(false)
   gallery          String[]
@@ -96,17 +96,17 @@ model projects {
 }
 
 model site_content {
-  id        String   @id
+  id        String   @id @default(uuid())
   key       String   @unique
   value     String
   type      String   @default("text")
   section   String
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 model student_applications {
-  id              String    @id
+  id              String    @id @default(uuid())
   firstName       String
   lastName        String
   email           String    @unique
@@ -117,7 +117,7 @@ model student_applications {
   coverLetter     String?
   status          String    @default("pending")
   createdAt       DateTime  @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime  @updatedAt
   githubUrl       String?
   portfolioUrl    String?
   primaryInterest String?
@@ -129,14 +129,14 @@ model student_applications {
 }
 
 model team_members {
-  id        String   @id
+  id        String   @id @default(uuid())
   name      String
   role      String
   division  String
   bio       String?
   imageUrl  String?
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   email     String?
   featured  Boolean  @default(false)
   github    String?
@@ -145,7 +145,7 @@ model team_members {
 }
 
 model testimonials {
-  id        String   @id
+  id        String   @id @default(uuid())
   name      String
   role      String
   division  String
@@ -154,5 +154,5 @@ model testimonials {
   isActive  Boolean  @default(true)
   order     Int      @default(0)
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }
