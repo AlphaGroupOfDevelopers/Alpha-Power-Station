@@ -192,7 +192,7 @@ export default function ArticlePage({ params }: ArticlePageProps) {
                     return (
                       <ul key={index} className="list-disc list-inside space-y-2 mb-6 text-gray-700">
                         {block.items?.map((item, i) => (
-                          <li key={i}>{item}</li>
+                          <li key={i}>{typeof item === 'string' ? item : item.label || item.value}</li>
                         ))}
                       </ul>
                     );
