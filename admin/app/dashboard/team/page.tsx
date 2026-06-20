@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { Plus, Edit, Trash2, Mail, Github, Linkedin } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, Globe } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -152,7 +152,7 @@ export default function TeamPage() {
                             className="text-gray-400 hover:text-gray-900 transition"
                             title="GitHub"
                           >
-                            <Github className="h-4 w-4" />
+                            <Globe className="h-4 w-4" />
                           </a>
                         )}
                         {member.linkedin && (
@@ -163,7 +163,7 @@ export default function TeamPage() {
                             className="text-gray-400 hover:text-blue-600 transition"
                             title="LinkedIn"
                           >
-                            <Linkedin className="h-4 w-4" />
+                            <Globe className="h-4 w-4" />
                           </a>
                         )}
                         {!member.email && !member.github && !member.linkedin && (
