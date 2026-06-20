@@ -200,14 +200,17 @@ export default function ArticlePage({ params }: ArticlePageProps) {
                   case 'stats':
                     return (
                       <div key={index} className="grid md:grid-cols-3 gap-6 my-8 bg-gray-50 p-8 rounded-lg">
-                        {block.items?.map((stat, i) => (
-                          <div key={i} className="text-center">
-                            <div className="text-4xl font-bold text-blue-600 mb-2">
-                              {stat.value}
+                        {block.items?.map((stat, i) => {
+                          const statData = typeof stat === 'string' ? { value: stat, label: '' } : stat;
+                          return (
+                            <div key={i} className="text-center">
+                              <div className="text-4xl font-bold text-blue-600 mb-2">
+                                {statData.value}
+                              </div>
+                              <div className="text-gray-600">{statData.label}</div>
                             </div>
-                            <div className="text-gray-600">{stat.label}</div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     );
                   
