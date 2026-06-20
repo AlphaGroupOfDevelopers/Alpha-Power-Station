@@ -92,13 +92,18 @@ router.post(
 
       // Set cookie
       console.log('Setting cookie...');
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-origin in production
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
-      console.log('✓ Cookie set');
+      console.log('✓ Cookie set with options:', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax'
+      });
 
       const response = {
         success: true,

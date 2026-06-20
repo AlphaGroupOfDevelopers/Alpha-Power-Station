@@ -43,6 +43,10 @@ export const authService = {
         console.log('✓ Storing token and user in localStorage');
         localStorage.setItem('admin_token', response.data.token);
         localStorage.setItem('admin_user', JSON.stringify(response.data.user));
+        
+        // Also set token as a cookie for middleware
+        document.cookie = `token=${response.data.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+        console.log('✓ Token stored in cookie for middleware');
         console.log('✓ Login successful!');
       } else {
         console.warn('⚠️ Missing token or user in response');
@@ -73,6 +77,8 @@ export const authService = {
     } finally {
       localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_user');
+      // Also remove the cookie
+      document.cookie = 'token=; path=/; max-age=0';
     }
   },
 
