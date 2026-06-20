@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { Plus, Edit, Trash2, Mail, Globe } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, Globe, Github, Linkedin, Twitter, Instagram, Facebook, MessageCircle, ExternalLink } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -17,6 +17,15 @@ interface TeamMember {
   featured: boolean;
   github: string | null;
   linkedin: string | null;
+  twitter: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  whatsapp: string | null;
+  website: string | null;
+  gmail: string | null;
+  youtube: string | null;
+  tiktok: string | null;
+  telegram: string | null;
   createdAt: string;
 }
 

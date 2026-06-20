@@ -141,6 +141,15 @@ model team_members {
   featured  Boolean  @default(false)
   github    String?
   linkedin  String?
+  twitter   String?
+  instagram String?
+  facebook  String?
+  whatsapp  String?
+  website   String?
+  gmail     String?
+  youtube   String?
+  tiktok    String?
+  telegram  String?
   order     Int      @default(0)
 }
 
