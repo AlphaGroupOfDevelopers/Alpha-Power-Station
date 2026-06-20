@@ -68,9 +68,9 @@ router.post(
           mimeType: file.mimetype,
           size: file.size,
           url,
-          thumbnail,
+          thumbnail: thumbnail || undefined,
           folder,
-          uploadedBy: req.user?.email,
+          uploadedBy: req.user?.email || undefined,
         },
       });
 
@@ -122,9 +122,9 @@ router.post(
             mimeType: file.mimetype,
             size: file.size,
             url,
-            thumbnail,
+            thumbnail: thumbnail || undefined,
             folder,
-            uploadedBy: req.user?.email,
+            uploadedBy: req.user?.email || undefined,
           },
         });
 
