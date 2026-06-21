@@ -23,6 +23,7 @@ export default function SiteContentPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
   const [newContent, setNewContent] = useState<{
     key: string;
     value: string;
@@ -85,6 +86,21 @@ export default function SiteContentPage() {
     },
   });
 
+  const seedTeamMutation = useMutation({
+    mutationFn: async () => {
+      return await api.post('/admin/seed/team');
+    },
+    onSuccess: (response: any) => {
+      queryClient.invalidateQueries({ queryKey: ['site-content'] });
+      success(`Seeded ${response.data.created} items! (${response.data.skipped} already existed)`);
+      setIsSeeding(false);
+    },
+    onError: (err: any) => {
+      showError(err.response?.data?.error || 'Failed to seed content');
+      setIsSeeding(false);
+    },
+  });
+
   const handleEdit = (content: SiteContent) => {
     setEditingId(content.id);
     setEditValue(content.value);
@@ -139,13 +155,27 @@ export default function SiteContentPage() {
               Manage website content (homepage, about page, etc.)
             </p>
           </div>
-          <button
-            onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            <Plus className="h-5 w-5" />
-            Add Content
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                if (confirm('Seed team page content? This will add 31 items (skip existing).')) {
+                  setIsSeeding(true);
+                  seedTeamMutation.mutate();
+                }
+              }}
+              disabled={isSeeding}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+            >
+              {isSeeding ? '⏳ Seeding...' : '🌱 Seed Team Content'}
+            </button>
+            <button
+              onClick={() => setIsCreating(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              <Plus className="h-5 w-5" />
+              Add Content
+            </button>
+          </div>
         </div>
 
         {/* Create Form */}

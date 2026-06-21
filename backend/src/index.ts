@@ -24,6 +24,7 @@ import adminInquiryRoutes from './routes/admin/inquiries';
 import adminPartnerRoutes from './routes/admin/partners';
 import adminSiteContentRoutes from './routes/admin/site-content';
 import adminTestimonialsRoutes from './routes/admin/testimonials';
+import adminSeedRoutes from './routes/admin/seed-content';
 
 dotenv.config();
 
@@ -97,6 +98,7 @@ app.use('/api/admin/inquiries', adminInquiryRoutes);
 app.use('/api/admin/partners', adminPartnerRoutes);
 app.use('/api/admin/site-content', adminSiteContentRoutes);
 app.use('/api/admin/testimonials', adminTestimonialsRoutes);
+app.use('/api/admin/seed', adminSeedRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
