@@ -10,6 +10,8 @@ import path from 'path';
 import projectRoutes from './routes/projects';
 import studentRoutes from './routes/students';
 import contactRoutes from './routes/contact';
+import siteContentRoutes from './routes/site-content';
+import testimonialsRoutes from './routes/testimonials';
 
 // Admin routes
 import adminAuthRoutes from './routes/admin/auth-verbose';
@@ -20,6 +22,8 @@ import adminMediaRoutes from './routes/admin/media';
 import adminApplicationRoutes from './routes/admin/applications';
 import adminInquiryRoutes from './routes/admin/inquiries';
 import adminPartnerRoutes from './routes/admin/partners';
+import adminSiteContentRoutes from './routes/admin/site-content';
+import adminTestimonialsRoutes from './routes/admin/testimonials';
 
 dotenv.config();
 
@@ -79,6 +83,8 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/api/projects', projectRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/site-content', siteContentRoutes);
+app.use('/api/testimonials', testimonialsRoutes);
 
 // Admin API routes
 app.use('/api/admin/auth', adminAuthRoutes);
@@ -89,6 +95,8 @@ app.use('/api/admin/media', adminMediaRoutes);
 app.use('/api/admin/applications', adminApplicationRoutes);
 app.use('/api/admin/inquiries', adminInquiryRoutes);
 app.use('/api/admin/partners', adminPartnerRoutes);
+app.use('/api/admin/site-content', adminSiteContentRoutes);
+app.use('/api/admin/testimonials', adminTestimonialsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

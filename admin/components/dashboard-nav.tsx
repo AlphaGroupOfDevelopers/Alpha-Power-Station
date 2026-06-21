@@ -14,15 +14,19 @@ import {
   Image,
   Settings,
   LogOut,
+  FileEdit,
+  MessageSquare,
 } from 'lucide-react';
 import { authService } from '@/lib/auth';
 import { useAuthStore } from '@/store/auth.store';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard/content', label: 'Site Content', icon: FileEdit },
   { href: '/dashboard/projects', label: 'Projects', icon: FolderKanban },
   { href: '/dashboard/news', label: 'News', icon: Newspaper },
   { href: '/dashboard/team', label: 'Team', icon: Users },
+  { href: '/dashboard/testimonials', label: 'Testimonials', icon: MessageSquare },
   { href: '/dashboard/applications', label: 'Applications', icon: FileText },
   { href: '/dashboard/inquiries', label: 'Inquiries', icon: Mail },
   { href: '/dashboard/partners', label: 'Partners', icon: Handshake },
