@@ -23,10 +23,15 @@ export default function SiteContentPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [newContent, setNewContent] = useState({
+  const [newContent, setNewContent] = useState<{
+    key: string;
+    value: string;
+    type: 'text' | 'textarea' | 'html' | 'json' | 'image';
+    section: string;
+  }>({
     key: '',
     value: '',
-    type: 'text' as const,
+    type: 'text',
     section: 'homepage',
   });
 
@@ -183,7 +188,7 @@ export default function SiteContentPage() {
                 </label>
                 <select
                   value={newContent.type}
-                  onChange={(e) => setNewContent({ ...newContent, type: e.target.value as any })}
+                  onChange={(e) => setNewContent({ ...newContent, type: e.target.value as 'text' | 'textarea' | 'html' | 'json' | 'image' })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="text">Text</option>
@@ -198,7 +203,7 @@ export default function SiteContentPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Value
               </label>
-              {newContent.type === 'textarea' || newContent.type === 'html' ? (
+              {(newContent.type === 'textarea' || newContent.type === 'html') ? (
                 <textarea
                   value={newContent.value}
                   onChange={(e) => setNewContent({ ...newContent, value: e.target.value })}
