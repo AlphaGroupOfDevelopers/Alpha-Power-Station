@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { Plus, Edit, Trash2, Mail, Globe, Github, Linkedin, Twitter, Instagram, Facebook, MessageCircle, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, Globe, ExternalLink } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -153,29 +153,12 @@ export default function TeamPage() {
                             <Mail className="h-4 w-4" />
                           </a>
                         )}
-                        {member.github && (
-                          <a
-                            href={member.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-gray-900 transition"
-                            title="GitHub"
-                          >
+                        {(member.github || member.linkedin || member.twitter || member.website) && (
+                          <span className="text-gray-400" title="Has social links">
                             <Globe className="h-4 w-4" />
-                          </a>
+                          </span>
                         )}
-                        {member.linkedin && (
-                          <a
-                            href={member.linkedin}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-blue-600 transition"
-                            title="LinkedIn"
-                          >
-                            <Globe className="h-4 w-4" />
-                          </a>
-                        )}
-                        {!member.email && !member.github && !member.linkedin && (
+                        {!member.email && !member.github && !member.linkedin && !member.twitter && !member.website && (
                           <span className="text-sm text-gray-400">—</span>
                         )}
                       </div>
