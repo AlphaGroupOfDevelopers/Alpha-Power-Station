@@ -14,7 +14,7 @@ import siteContentRoutes from './routes/site-content';
 import testimonialsRoutes from './routes/testimonials';
 
 // Admin routes
-import adminAuthRoutes from './routes/admin/auth-verbose';
+import adminAuthRoutes from './routes/admin/auth';
 import adminProjectRoutes from './routes/admin/projects';
 import adminNewsRoutes from './routes/admin/news';
 import adminTeamRoutes from './routes/admin/team';
