@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
@@ -17,7 +17,7 @@ router.post(
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('role').isIn(['admin', 'editor', 'viewer']).withMessage('Invalid role'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     // Only admins can create new users
     if (req.user?.role !== 'admin') {
       return res.status(403).json({ error: 'Only admins can create new users' });
@@ -78,7 +78,7 @@ router.post(
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -181,7 +181,7 @@ router.post(
     body('currentPassword').notEmpty().withMessage('Current password is required'),
     body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });

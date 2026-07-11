@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
 import { authenticateToken, requireRole } from '../../middleware/auth';
@@ -54,7 +54,7 @@ router.post(
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('category').trim().notEmpty().withMessage('Category is required'),
   ],
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
