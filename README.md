@@ -91,7 +91,12 @@ npm run prisma:generate
 npm run prisma:migrate
 ```
 
-5. **Run the development servers**
+5. **Create your first admin user** (required to log into the admin dashboard)
+```bash
+npm run create-admin
+```
+
+6. **Run the development servers**
 
 Open three terminal windows:
 

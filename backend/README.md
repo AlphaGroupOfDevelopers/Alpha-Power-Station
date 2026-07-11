@@ -34,7 +34,13 @@ npm run prisma:generate
 npm run prisma:migrate
 ```
 
-6. Start the development server:
+6. Create your first admin user (required before you can log into the admin dashboard):
+```bash
+npm run create-admin
+```
+This prompts for an email, name, and password and creates an `admin` role account. Without this step, the `admin_users` table is empty and every login attempt fails with "Invalid credentials", regardless of what you type.
+
+7. Start the development server:
 ```bash
 npm run dev
 ```
@@ -77,6 +83,9 @@ prisma/
 - `npm run prisma:studio` - Open Prisma Studio (GUI for database)
 - `npm run prisma:migrate` - Create and apply migrations
 - `npm run prisma:generate` - Regenerate Prisma Client
+- `npm run prisma:seed` - Populate the database with sample projects, team members, a student application, and a contact inquiry
+- `npm run create-admin` - Create an admin user for logging into the admin dashboard
+- `npm run seed:site-content` - Seed the editable homepage/about/contact/FAQ copy used by the public site
 
 ## Deployment
 
