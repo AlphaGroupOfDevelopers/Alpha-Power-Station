@@ -1,11 +1,33 @@
 import Link from 'next/link';
+import { getSiteContent, pick } from '@/lib/site-content';
 
 export const metadata = {
   title: 'Partnerships & Collaborations | Alpha Power Station',
   description: 'Partner with Alpha Power Station for innovative engineering solutions, talent development, and impactful collaborations across West Africa.',
 };
 
-export default function PartnershipsPage() {
+interface Partner {
+  id: string;
+  name: string;
+  description: string | null;
+  logoUrl: string | null;
+  website: string | null;
+}
+
+async function getPartners(): Promise<Partner[]> {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+  try {
+    const response = await fetch(`${API_URL}/partners`, { next: { revalidate: 60 } });
+    if (!response.ok) return [];
+    return response.json();
+  } catch {
+    return [];
+  }
+}
+
+export default async function PartnershipsPage() {
+  const [partners, content] = await Promise.all([getPartners(), getSiteContent('partnerships')]);
+
   return (
     <div className="bg-white">
       {/* Hero */}
@@ -26,10 +48,11 @@ export default function PartnershipsPage() {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-6">Why Partner with Alpha Power Station?</h2>
             <p className="text-lg text-gray-700 leading-relaxed mb-12">
-              We offer unique value through our integrated hardware-software approach, deep understanding 
-              of African infrastructure challenges, and commitment to sustainable, locally-designed solutions. 
-              Partnering with us means access to innovative talent, cutting-edge projects, and meaningful 
-              social impact.
+              {pick(
+                content,
+                'partnerships.intro_body',
+                'We offer unique value through our integrated hardware-software approach, deep understanding of African infrastructure challenges, and commitment to sustainable, locally-designed solutions. Partnering with us means access to innovative talent, cutting-edge projects, and meaningful social impact.'
+              )}
             </p>
           </div>
 
@@ -242,13 +265,34 @@ export default function PartnershipsPage() {
             <p className="text-gray-600 mb-8">
               We're proud to collaborate with leading organizations committed to African innovation
             </p>
-            <div className="grid md:grid-cols-4 gap-8">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-gray-100 h-32 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-400">Partner Logo</span>
-                </div>
-              ))}
-            </div>
+            {partners.length === 0 ? (
+              <p className="text-gray-400">Partner logos will appear here once added from the admin dashboard.</p>
+            ) : (
+              <div className="grid md:grid-cols-4 gap-8">
+                {partners.map((partner) => {
+                  const content = partner.logoUrl ? (
+                    <img
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      className="max-h-20 max-w-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-gray-600 font-semibold">{partner.name}</span>
+                  );
+                  return (
+                    <div key={partner.id} className="bg-gray-100 h-32 rounded-lg flex items-center justify-center p-4">
+                      {partner.website ? (
+                        <a href={partner.website} target="_blank" rel="noopener noreferrer" title={partner.name}>
+                          {content}
+                        </a>
+                      ) : (
+                        content
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -1,10 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Plus, Edit, Trash2, Mail, Globe, ExternalLink } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { ToastContainer } from '@/components/toast';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface TeamMember {
   id: string;
@@ -30,11 +34,30 @@ interface TeamMember {
 }
 
 export default function TeamPage() {
+  const queryClient = useQueryClient();
+  const { toasts, removeToast, success, error: showError } = useToast();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const { data: members, isLoading } = useQuery({
     queryKey: ['team'],
     queryFn: async () => {
       const response = await api.get<TeamMember[]>('/admin/team');
       return response.data;
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/admin/team/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team'] });
+      success('Team member deleted successfully!');
+      setDeleteId(null);
+    },
+    onError: () => {
+      showError('Failed to delete team member');
+      setDeleteId(null);
     },
   });
 
@@ -50,7 +73,19 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="p-8">
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ConfirmDialog
+        isOpen={deleteId !== null}
+        title="Delete Team Member"
+        message="Are you sure you want to delete this team member? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        variant="danger"
+      />
+
+      <div className="p-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -176,6 +211,7 @@ export default function TeamPage() {
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
+                          onClick={() => setDeleteId(member.id)}
                           title="Delete"
                           className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition"
                         >
@@ -191,5 +227,6 @@ export default function TeamPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

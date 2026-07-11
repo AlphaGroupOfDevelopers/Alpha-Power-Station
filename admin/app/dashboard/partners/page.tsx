@@ -1,10 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { ToastContainer } from '@/components/toast';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Partner {
   id: string;
@@ -19,11 +23,30 @@ interface Partner {
 }
 
 export default function PartnersPage() {
+  const queryClient = useQueryClient();
+  const { toasts, removeToast, success, error: showError } = useToast();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
   const { data: partners, isLoading } = useQuery({
     queryKey: ['partners'],
     queryFn: async () => {
       const response = await api.get<Partner[]>('/admin/partners');
       return response.data;
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/admin/partners/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partners'] });
+      success('Partner deleted successfully!');
+      setDeleteId(null);
+    },
+    onError: () => {
+      showError('Failed to delete partner');
+      setDeleteId(null);
     },
   });
 
@@ -39,7 +62,19 @@ export default function PartnersPage() {
   }
 
   return (
-    <div className="p-8">
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ConfirmDialog
+        isOpen={deleteId !== null}
+        title="Delete Partner"
+        message="Are you sure you want to delete this partner? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
+        onCancel={() => setDeleteId(null)}
+        variant="danger"
+      />
+
+      <div className="p-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -164,6 +199,7 @@ export default function PartnersPage() {
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
+                          onClick={() => setDeleteId(partner.id)}
                           title="Delete"
                           className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition"
                         >
@@ -179,5 +215,6 @@ export default function PartnersPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

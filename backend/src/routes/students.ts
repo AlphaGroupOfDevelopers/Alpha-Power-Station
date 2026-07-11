@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
+import { uploadApplicationFiles } from '../middleware/upload';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -8,6 +9,7 @@ const prisma = new PrismaClient();
 // POST submit student application
 router.post(
   '/apply',
+  uploadApplicationFiles,
   [
     body('firstName').trim().notEmpty().withMessage('First name is required'),
     body('lastName').trim().notEmpty().withMessage('Last name is required'),
@@ -31,8 +33,54 @@ router.post(
         return res.status(409).json({ error: 'Application with this email already exists' });
       }
 
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+      const resumeFile = files?.resume?.[0];
+      const coverLetterFile = files?.coverLetter?.[0];
+
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        university,
+        program,
+        yearOfStudy,
+        expectedGraduation,
+        division,
+        primaryInterest,
+        secondaryInterest,
+        relevantCourses,
+        projects,
+        githubUrl,
+        portfolioUrl,
+        whyApply,
+        whatContribute,
+        availability,
+      } = req.body;
+
       const application = await prisma.student_applications.create({
-        data: req.body,
+        data: {
+          firstName,
+          lastName,
+          email,
+          phone,
+          university,
+          program,
+          yearOfStudy,
+          expectedGraduation,
+          division,
+          primaryInterest,
+          secondaryInterest,
+          relevantCourses,
+          projects,
+          githubUrl,
+          portfolioUrl,
+          whyApply,
+          whatContribute,
+          availability,
+          resume: resumeFile ? `/uploads/${resumeFile.filename}` : undefined,
+          coverLetter: coverLetterFile ? `/uploads/${coverLetterFile.filename}` : undefined,
+        },
       });
 
       res.status(201).json({
@@ -40,28 +88,10 @@ router.post(
         applicationId: application.id,
       });
     } catch (error) {
+      console.error('Application submission error:', error);
       res.status(500).json({ error: 'Failed to submit application' });
     }
   }
 );
-
-// GET all applications (admin only - add auth middleware later)
-router.get('/applications', async (req: Request, res: Response) => {
-  try {
-    const { status, division } = req.query;
-    
-    const applications = await prisma.student_applications.findMany({
-      where: {
-        ...(status && { status: status as string }),
-        ...(division && { division: division as string }),
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    res.json(applications);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch applications' });
-  }
-});
 
 export default router;

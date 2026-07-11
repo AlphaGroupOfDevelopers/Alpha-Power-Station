@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Eye, Download } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
+import Link from 'next/link';
 
 interface Application {
   id: string;
@@ -128,12 +129,13 @@ export default function ApplicationsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
+                        <Link
+                          href={`/dashboard/applications/${app.id}`}
                           title="View Details"
                           className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition"
                         >
                           <Eye className="h-4 w-4" />
-                        </button>
+                        </Link>
                         {app.resume && (
                           <a
                             href={app.resume}

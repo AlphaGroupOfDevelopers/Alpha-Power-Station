@@ -8,7 +8,31 @@ export const metadata = {
   description: 'Join Alpha Power Station and gain hands-on experience building real engineering solutions that transform West African infrastructure.',
 };
 
-export default function StudentProgramsPage() {
+interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  division: string;
+  content: string;
+}
+
+const AVATAR_COLORS = ['bg-blue-600', 'bg-green-600', 'bg-purple-600'];
+
+async function getTestimonials(): Promise<Testimonial[]> {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+  try {
+    const response = await fetch(`${API_URL}/testimonials`, { next: { revalidate: 60 } });
+    if (!response.ok) return [];
+    const testimonials: Testimonial[] = await response.json();
+    return testimonials.slice(0, 3);
+  } catch {
+    return [];
+  }
+}
+
+export default async function StudentProgramsPage() {
+  const testimonials = await getTestimonials();
+
   return (
     <div className="bg-white">
       {/* Hero Section with Video Background */}
@@ -345,55 +369,28 @@ export default function StudentProgramsPage() {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl font-bold mb-12 text-center">Student Voices</h2>
             
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-lg shadow-md p-8">
-                <div className="mb-4">
-                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 mx-auto">
-                    KM
+            {testimonials.length === 0 ? (
+              <p className="text-center text-gray-500">
+                Student testimonials will appear here once added from the admin dashboard.
+              </p>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-8">
+                {testimonials.map((testimonial, index) => (
+                  <div key={testimonial.id} className="bg-white rounded-lg shadow-md p-8">
+                    <div className="mb-4">
+                      <div className={`w-16 h-16 ${AVATAR_COLORS[index % AVATAR_COLORS.length]} rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 mx-auto`}>
+                        {testimonial.name.split(' ').map((n) => n.charAt(0)).join('').slice(0, 2)}
+                      </div>
+                    </div>
+                    <p className="text-gray-700 italic mb-4">"{testimonial.content}"</p>
+                    <div className="text-center">
+                      <div className="font-bold">{testimonial.name}</div>
+                      <div className="text-sm text-gray-600">{testimonial.role} • {testimonial.division}</div>
+                    </div>
                   </div>
-                </div>
-                <p className="text-gray-700 italic mb-4">
-                  "In 6 months at Alpha, I learned more than in 3 years of university. I shipped 
-                  firmware that's running on 5,000+ meters. That's incredible."
-                </p>
-                <div className="text-center">
-                  <div className="font-bold">Kofi Mensah</div>
-                  <div className="text-sm text-gray-600">AGD • Now at Google</div>
-                </div>
+                ))}
               </div>
-
-              <div className="bg-white rounded-lg shadow-md p-8">
-                <div className="mb-4">
-                  <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 mx-auto">
-                    AN
-                  </div>
-                </div>
-                <p className="text-gray-700 italic mb-4">
-                  "The mentorship is unmatched. I had weekly 1-on-1s with the Head of Power Systems. 
-                  Now I'm pursuing my PhD in renewable energy."
-                </p>
-                <div className="text-center">
-                  <div className="font-bold">Amina Nkrumah</div>
-                  <div className="text-sm text-gray-600">AGEE • PhD Student, MIT</div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-md p-8">
-                <div className="mb-4">
-                  <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 mx-auto">
-                    EO
-                  </div>
-                </div>
-                <p className="text-gray-700 italic mb-4">
-                  "I came for the technology, but stayed for the mission. Knowing my work impacts 
-                  real communities is what gets me up every morning."
-                </p>
-                <div className="text-center">
-                  <div className="font-bold">Emmanuel Osei</div>
-                  <div className="text-sm text-gray-600">AGD/AGEE • Currently at Alpha</div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

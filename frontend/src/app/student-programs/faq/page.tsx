@@ -1,110 +1,33 @@
 import Link from 'next/link';
+import { getSiteContent, pickJSON } from '@/lib/site-content';
 
 export const metadata = {
   title: 'FAQ - Student Programs | Alpha Power Station',
   description: 'Frequently asked questions about Alpha Power Station student programs, application process, and opportunities.',
 };
 
-export default function FAQPage() {
-  const faqs = [
-    {
-      category: 'Application Process',
-      questions: [
-        {
-          q: 'Who is eligible to apply?',
-          a: 'We accept applications from current university students (any year) and recent graduates (within 1 year). All disciplines are welcome, though engineering and technology backgrounds are preferred. Most importantly, we look for passion, curiosity, and commitment to learning.',
-        },
-        {
-          q: 'When should I apply?',
-          a: 'Applications are reviewed on a rolling basis throughout the year. We have intake cohorts starting in January, April, July, and October. We recommend applying at least 6-8 weeks before your desired start date.',
-        },
-        {
-          q: 'How long does the application process take?',
-          a: 'From submission to decision typically takes 2-3 weeks. This includes the technical assessment (3-5 days), interview scheduling (1 week), and final decision (1 week). We move quickly to ensure you have enough time to plan.',
-        },
-        {
-          q: 'What if I don\'t have prior experience?',
-          a: 'Prior experience is helpful but not required. We look for strong fundamentals, problem-solving ability, and eagerness to learn. Many of our most successful students had limited experience when they joined. What matters is your attitude and commitment.',
-        },
-      ],
-    },
-    {
-      category: 'Program Details',
-      questions: [
-        {
-          q: 'How long is the program?',
-          a: 'Programs are flexible, ranging from 6 to 12 months. We work with your academic schedule. Most students participate for 6-9 months, which provides enough time to complete meaningful projects and develop strong skills.',
-        },
-        {
-          q: 'What is the time commitment?',
-          a: 'We require a minimum of 20 hours per week. Most students commit 30-40 hours/week during semester breaks and 20-25 hours/week during term time. The program is intensive—this is not a casual internship.',
-        },
-        {
-          q: 'Is this remote or in-person?',
-          a: 'Currently, we operate primarily in-person at our facilities in West Africa. This allows for better hardware-software integration work, mentorship, and team collaboration. Some remote flexibility is available for exceptional circumstances.',
-        },
-        {
-          q: 'Do I get paid?',
-          a: 'Yes. We provide stipends to help cover living expenses. The amount varies based on your year of study, commitment level (part-time vs full-time), and performance. Top performers may receive performance bonuses and equipment stipends.',
-        },
-      ],
-    },
-    {
-      category: 'Learning & Growth',
-      questions: [
-        {
-          q: 'What will I actually work on?',
-          a: 'Real projects, not toy problems. You might implement firmware for smart meters deployed to thousands of homes, design PCBs for renewable energy systems, build IoT platforms, or develop testing protocols. Your work has real impact from day one.',
-        },
-        {
-          q: 'Will I get mentorship?',
-          a: 'Absolutely. Each student is assigned a mentor from our technical leadership. You\'ll have weekly 1-on-1 meetings, regular code/design reviews, and access to the full team for questions. Learning is central to our culture.',
-        },
-        {
-          q: 'Can I switch between AGD and AGEE?',
-          a: 'Yes! We encourage cross-division learning. While you\'ll have a primary division (AGD or AGEE), you\'ll work on integrated projects and can participate in workshops and sessions from the other division.',
-        },
-        {
-          q: 'What happens after the program?',
-          a: 'Many outcomes: full-time job offers at Alpha or partner companies, funded graduate school opportunities, strong recommendation letters, and a portfolio of real projects. Our alumni network is strong—they help each other long after the program ends.',
-        },
-      ],
-    },
-    {
-      category: 'Technical Requirements',
-      questions: [
-        {
-          q: 'What tools/software do I need to know?',
-          a: 'For AGD: Comfortable with at least one programming language (C/C++, Python, JavaScript). We\'ll teach you embedded systems, RTOS, protocols, and cloud platforms. For AGEE: Basic circuit analysis and understanding of electronics. We\'ll teach you PCB design tools, power electronics, and testing.',
-        },
-        {
-          q: 'Do I need my own laptop/equipment?',
-          a: 'You need a laptop (doesn\'t have to be expensive). We provide all development boards, test equipment, tools, and software licenses. For hardware work, our lab has oscilloscopes, power supplies, and prototyping equipment.',
-        },
-        {
-          q: 'What if I haven\'t taken certain courses yet?',
-          a: 'That\'s fine. We assess your ability to learn, not just what you already know. We provide internal training and resources. Many students learn topics "just in time" as projects require them.',
-        },
-      ],
-    },
-    {
-      category: 'Logistics',
-      questions: [
-        {
-          q: 'Where are you located?',
-          a: 'Our main facilities are in Ghana, West Africa. We\'re working on expanding to other West African countries. Location details are provided upon acceptance.',
-        },
-        {
-          q: 'Do you provide housing?',
-          a: 'We don\'t directly provide housing, but we help students find affordable accommodation near our facilities. We also connect you with current students who can share housing.',
-        },
-        {
-          q: 'What about visa/work permits for international students?',
-          a: 'For students within West Africa (ECOWAS), movement is generally straightforward. For international students from outside the region, we provide support letters but you\'re responsible for visa arrangements.',
-        },
-      ],
-    },
-  ];
+interface FAQItem {
+  q: string;
+  a: string;
+}
+
+interface FAQCategory {
+  category: string;
+  questions: FAQItem[];
+}
+
+const DEFAULT_FAQS: FAQCategory[] = [
+  {
+    category: 'Application Process',
+    questions: [
+      { q: 'Who is eligible to apply?', a: 'We accept applications from current university students (any year) and recent graduates (within 1 year).' },
+    ],
+  },
+];
+
+export default async function FAQPage() {
+  const content = await getSiteContent('faq');
+  const faqs = pickJSON<FAQCategory[]>(content, 'faq.items', DEFAULT_FAQS);
 
   return (
     <div className="bg-white">

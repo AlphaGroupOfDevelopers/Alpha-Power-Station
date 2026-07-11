@@ -106,26 +106,32 @@ model site_content {
 }
 
 model student_applications {
-  id              String    @id @default(uuid())
-  firstName       String
-  lastName        String
-  email           String    @unique
-  phone           String
-  university      String?
-  division        String
-  resume          String?
-  coverLetter     String?
-  status          String    @default("pending")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  githubUrl       String?
-  portfolioUrl    String?
-  primaryInterest String?
-  program         String?
-  reviewNotes     String?
-  reviewedAt      DateTime?
-  whyApply        String?
-  yearOfStudy     String?
+  id                 String    @id @default(uuid())
+  firstName          String
+  lastName           String
+  email              String    @unique
+  phone              String
+  university         String?
+  division           String
+  resume             String?
+  coverLetter        String?
+  status             String    @default("pending")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  githubUrl          String?
+  portfolioUrl       String?
+  primaryInterest    String?
+  program            String?
+  reviewNotes        String?
+  reviewedAt         DateTime?
+  whyApply           String?
+  yearOfStudy        String?
+  expectedGraduation String?
+  secondaryInterest  String?
+  relevantCourses    String?
+  projects           String?
+  whatContribute     String?
+  availability       String?
 }
 
 model team_members {

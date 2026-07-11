@@ -5,6 +5,10 @@ import Link from 'next/link';
 
 export default function ApplyPage() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [submitError, setSubmitError] = useState('');
   const [formData, setFormData] = useState({
     // Step 1: Personal Info
     firstName: '',
@@ -56,16 +60,40 @@ export default function ApplyPage() {
     }
   };
 
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: (file: File | null) => void
+  ) => {
+    setter(e.target.files?.[0] || null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!resumeFile) {
+      setSubmitStatus('error');
+      setSubmitError('Please upload your resume/CV before submitting.');
+      return;
+    }
+
+    setSubmitStatus('submitting');
+    setSubmitError('');
+
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      
+
+      const submission = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        submission.append(key, value);
+      });
+      submission.append('resume', resumeFile);
+      if (coverLetterFile) {
+        submission.append('coverLetter', coverLetterFile);
+      }
+
       const response = await fetch(`${API_URL}/students/apply`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: submission,
       });
 
       if (!response.ok) {
@@ -73,38 +101,36 @@ export default function ApplyPage() {
         throw new Error(errorData.error || 'Failed to submit application');
       }
 
-      const data = await response.json();
-      console.log('Application submitted:', data);
-      
-      alert('Application submitted successfully! You will receive a confirmation email shortly.');
-      
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        university: '',
-        program: '',
-        yearOfStudy: '',
-        expectedGraduation: '',
-        division: '',
-        primaryInterest: '',
-        secondaryInterest: '',
-        relevantCourses: '',
-        projects: '',
-        githubUrl: '',
-        portfolioUrl: '',
-        whyApply: '',
-        whatContribute: '',
-        availability: '',
-      });
-      setCurrentStep(1);
+      setSubmitStatus('success');
     } catch (error: any) {
-      console.error('Error submitting application:', error);
-      alert(error.message || 'Failed to submit application. Please try again.');
+      setSubmitStatus('error');
+      setSubmitError(error.message || 'Failed to submit application. Please try again.');
     }
   };
+
+  if (submitStatus === 'success') {
+    return (
+      <div className="bg-gray-50 min-h-screen py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <h1 className="text-3xl font-bold mb-4 text-green-700">Application Submitted!</h1>
+              <p className="text-gray-600 mb-8">
+                Thank you for applying to Alpha Power Station. Our team will review your
+                application and reach out to you directly.
+              </p>
+              <Link
+                href="/student-programs"
+                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              >
+                Back to Student Programs
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen py-12">
@@ -118,6 +144,12 @@ export default function ApplyPage() {
             <h1 className="text-4xl font-bold mb-2">Application Portal</h1>
             <p className="text-gray-600">Join Alpha Power Station</p>
           </div>
+
+          {submitStatus === 'error' && (
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-8 rounded">
+              {submitError}
+            </div>
+          )}
 
           {/* Progress Bar */}
           <div className="bg-white rounded-lg shadow-md p-8 mb-8">
@@ -456,6 +488,38 @@ export default function ApplyPage() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">
+                        Resume/CV <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => handleFileChange(e, setResumeFile)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      />
+                      {resumeFile && (
+                        <p className="mt-1 text-sm text-gray-600">Selected: {resumeFile.name}</p>
+                      )}
+                      <p className="mt-1 text-sm text-gray-500">PDF, DOC, or DOCX up to 10MB</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">
+                        Cover Letter
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => handleFileChange(e, setCoverLetterFile)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      />
+                      {coverLetterFile && (
+                        <p className="mt-1 text-sm text-gray-600">Selected: {coverLetterFile.name}</p>
+                      )}
+                      <p className="mt-1 text-sm text-gray-500">Optional — PDF, DOC, or DOCX up to 10MB</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -551,9 +615,10 @@ export default function ApplyPage() {
                 ) : (
                   <button
                     type="submit"
-                    className="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700"
+                    disabled={submitStatus === 'submitting'}
+                    className="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Submit Application
+                    {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Application'}
                   </button>
                 )}
               </div>

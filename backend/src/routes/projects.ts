@@ -7,13 +7,14 @@ const prisma = new PrismaClient();
 // GET all projects
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { category, division, status } = req.query;
-    
+    const { category, division, status, featured } = req.query;
+
     const projects = await prisma.projects.findMany({
       where: {
         ...(category && { category: category as string }),
         ...(division && { division: division as string }),
         ...(status && { status: status as string }),
+        ...(featured && { featured: featured === 'true' }),
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -24,11 +25,11 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// GET single project
-router.get('/:id', async (req: Request, res: Response) => {
+// GET single project by slug
+router.get('/:slug', async (req: Request, res: Response) => {
   try {
     const project = await prisma.projects.findUnique({
-      where: { id: req.params.id },
+      where: { slug: req.params.slug },
     });
 
     if (!project) {
@@ -38,19 +39,6 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json(project);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch project' });
-  }
-});
-
-// POST create project (admin only - add auth middleware later)
-router.post('/', async (req: Request, res: Response) => {
-  try {
-    const project = await prisma.projects.create({
-      data: req.body,
-    });
-
-    res.status(201).json(project);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to create project' });
   }
 });
 

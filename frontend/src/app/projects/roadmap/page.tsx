@@ -1,85 +1,37 @@
 import Link from 'next/link';
+import { getSiteContent, pickJSON } from '@/lib/site-content';
 
 export const metadata = {
   title: 'Innovation Pipeline & Roadmap | Alpha Power Station',
   description: 'Explore our strategic roadmap of current projects and future initiatives driving African infrastructure innovation.',
 };
 
-export default function RoadmapPage() {
-  const timeline = [
-    {
-      quarter: 'Q2 2026',
-      status: 'Current',
-      projects: [
-        {
-          title: 'Smart Prepaid Meter - Phase 2',
-          type: 'Commercial',
-          description: 'Scaling deployment to 10,000 units across 5 regions',
-          progress: 60,
-        },
-        {
-          title: 'E-Waste Recovery Facility',
-          type: 'Foundational',
-          description: 'Establishing dedicated facility for component testing and grading',
-          progress: 40,
-        },
-      ],
-    },
-    {
-      quarter: 'Q3 2026',
-      status: 'Planned',
-      projects: [
-        {
-          title: 'Hybrid Solar Microgrid - Pilot',
-          type: 'Infrastructure',
-          description: '50kW system for commercial building installation',
-          progress: 20,
-        },
-        {
-          title: 'IoT Platform v2.0',
-          type: 'Commercial',
-          description: 'Enhanced analytics and predictive maintenance features',
-          progress: 15,
-        },
-      ],
-    },
-    {
-      quarter: 'Q4 2026',
-      status: 'Planned',
-      projects: [
-        {
-          title: 'Smart Street Lighting',
-          type: 'Infrastructure',
-          description: 'Solar-powered adaptive lighting system pilot',
-          progress: 10,
-        },
-        {
-          title: 'Battery Management System',
-          type: 'Commercial',
-          description: 'BMS for lithium-ion battery packs in renewable systems',
-          progress: 5,
-        },
-      ],
-    },
-    {
-      quarter: 'Q1 2027',
-      status: 'Future',
-      projects: [
-        {
-          title: 'Electric Vehicle Charger',
-          type: 'Infrastructure',
-          description: 'AC/DC charging stations for West African markets',
-          progress: 0,
-        },
-        {
-          title: 'Water Quality Monitoring',
-          type: 'Commercial',
-          description: 'IoT-based water quality sensors for distribution networks',
-          progress: 0,
-        },
-      ],
-    },
-  ];
+interface RoadmapProject {
+  title: string;
+  type: string;
+  description: string;
+  progress: number;
+}
+
+interface RoadmapQuarter {
+  quarter: string;
+  status: string;
+  projects: RoadmapProject[];
+}
+
+const DEFAULT_TIMELINE: RoadmapQuarter[] = [
+  {
+    quarter: 'Q2 2026',
+    status: 'Current',
+    projects: [
+      { title: 'Smart Prepaid Meter - Phase 2', type: 'Commercial', description: 'Scaling deployment to 10,000 units across 5 regions', progress: 60 },
+    ],
+  },
+];
+
+export default async function RoadmapPage() {
+  const content = await getSiteContent('roadmap');
+  const timeline = pickJSON<RoadmapQuarter[]>(content, 'roadmap.quarters', DEFAULT_TIMELINE);
 
   return (
     <div className="bg-white">

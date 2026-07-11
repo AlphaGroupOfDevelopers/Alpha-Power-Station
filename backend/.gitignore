@@ -8,6 +8,9 @@ node_modules/
 # Build output
 dist/
 
+# Uploaded media (runtime data, not source)
+uploads/
+
 # Prisma dev database
 prisma/*.db
 prisma/*.db-journal

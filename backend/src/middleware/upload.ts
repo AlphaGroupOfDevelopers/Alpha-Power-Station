@@ -49,3 +49,9 @@ export const uploadSingle = upload.single('file');
 
 // Multiple files upload
 export const uploadMultiple = upload.array('files', 10);
+
+// Student application file upload (resume + optional cover letter)
+export const uploadApplicationFiles = upload.fields([
+  { name: 'resume', maxCount: 1 },
+  { name: 'coverLetter', maxCount: 1 },
+]);

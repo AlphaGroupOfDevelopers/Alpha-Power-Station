@@ -1,11 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type InquiryType = 'general' | 'media' | 'business' | 'student';
 
+const DEFAULT_CONTACT_INFO = {
+  'contact.general_email': 'info@alphapowerstation.org',
+  'contact.media_email': 'media@alphapowerstation.org',
+  'contact.partnerships_email': 'partnerships@alphapowerstation.org',
+  'contact.students_email': 'students@alphapowerstation.org',
+  'contact.location_name': 'Alpha Power Station HQ',
+  'contact.location_address': 'Accra Technology University\nInnovation Hub\nAccra, Ghana',
+};
+
 export default function ContactPage() {
   const [selectedType, setSelectedType] = useState<InquiryType>('general');
+  const [contactInfo, setContactInfo] = useState<Record<string, string>>(DEFAULT_CONTACT_INFO);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,6 +26,21 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    fetch(`${API_URL}/site-content?section=contact`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((items: { key: string; value: string }[]) => {
+        if (items.length > 0) {
+          setContactInfo((prev) => ({
+            ...prev,
+            ...Object.fromEntries(items.map((item) => [item.key, item.value])),
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -120,29 +145,29 @@ export default function ContactPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-sm text-gray-600 mb-1">General Inquiries</h3>
-                  <a href="mailto:info@alphapowerstation.org" className="text-blue-600 hover:underline">
-                    info@alphapowerstation.org
+                  <a href={`mailto:${contactInfo['contact.general_email']}`} className="text-blue-600 hover:underline">
+                    {contactInfo['contact.general_email']}
                   </a>
                 </div>
 
                 <div>
                   <h3 className="font-semibold text-sm text-gray-600 mb-1">Media & Press</h3>
-                  <a href="mailto:media@alphapowerstation.org" className="text-blue-600 hover:underline">
-                    media@alphapowerstation.org
+                  <a href={`mailto:${contactInfo['contact.media_email']}`} className="text-blue-600 hover:underline">
+                    {contactInfo['contact.media_email']}
                   </a>
                 </div>
 
                 <div>
                   <h3 className="font-semibold text-sm text-gray-600 mb-1">Business Development</h3>
-                  <a href="mailto:partnerships@alphapowerstation.org" className="text-blue-600 hover:underline">
-                    partnerships@alphapowerstation.org
+                  <a href={`mailto:${contactInfo['contact.partnerships_email']}`} className="text-blue-600 hover:underline">
+                    {contactInfo['contact.partnerships_email']}
                   </a>
                 </div>
 
                 <div>
                   <h3 className="font-semibold text-sm text-gray-600 mb-1">Student Programs</h3>
-                  <a href="mailto:students@alphapowerstation.org" className="text-blue-600 hover:underline">
-                    students@alphapowerstation.org
+                  <a href={`mailto:${contactInfo['contact.students_email']}`} className="text-blue-600 hover:underline">
+                    {contactInfo['contact.students_email']}
                   </a>
                 </div>
               </div>
@@ -151,12 +176,15 @@ export default function ContactPage() {
             <div className="bg-blue-50 rounded-lg p-6 mb-6">
               <h2 className="text-xl font-bold mb-4">Location</h2>
               <p className="text-gray-700 mb-2">
-                <strong>Alpha Power Station HQ</strong>
+                <strong>{contactInfo['contact.location_name']}</strong>
               </p>
               <p className="text-gray-600 mb-4">
-                Accra Technology University<br />
-                Innovation Hub<br />
-                Accra, Ghana
+                {contactInfo['contact.location_address'].split('\n').map((line, i) => (
+                  <span key={i}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
               </p>
               {/* Placeholder for map - in production, integrate Google Maps or similar */}
               <div className="h-48 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600">

@@ -12,6 +12,9 @@ import studentRoutes from './routes/students';
 import contactRoutes from './routes/contact';
 import siteContentRoutes from './routes/site-content';
 import testimonialsRoutes from './routes/testimonials';
+import teamRoutes from './routes/team';
+import newsRoutes from './routes/news';
+import partnersRoutes from './routes/partners';
 
 // Admin routes
 import adminAuthRoutes from './routes/admin/auth';
@@ -24,7 +27,6 @@ import adminInquiryRoutes from './routes/admin/inquiries';
 import adminPartnerRoutes from './routes/admin/partners';
 import adminSiteContentRoutes from './routes/admin/site-content';
 import adminTestimonialsRoutes from './routes/admin/testimonials';
-import adminSeedRoutes from './routes/admin/seed-content';
 
 dotenv.config();
 
@@ -89,6 +91,9 @@ app.use('/api/students', studentRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/site-content', siteContentRoutes);
 app.use('/api/testimonials', testimonialsRoutes);
+app.use('/api/team', teamRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/partners', partnersRoutes);
 
 // Admin API routes
 app.use('/api/admin/auth', adminAuthRoutes);
@@ -101,7 +106,6 @@ app.use('/api/admin/inquiries', adminInquiryRoutes);
 app.use('/api/admin/partners', adminPartnerRoutes);
 app.use('/api/admin/site-content', adminSiteContentRoutes);
 app.use('/api/admin/testimonials', adminTestimonialsRoutes);
-app.use('/api/admin/seed', adminSeedRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

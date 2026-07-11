@@ -36,23 +36,4 @@ router.post(
   }
 );
 
-// GET all inquiries (admin only - add auth middleware later)
-router.get('/', async (req: Request, res: Response) => {
-  try {
-    const { status, type } = req.query;
-    
-    const inquiries = await prisma.contact_inquiries.findMany({
-      where: {
-        ...(status && { status: status as string }),
-        ...(type && { type: type as string }),
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    res.json(inquiries);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch inquiries' });
-  }
-});
-
 export default router;

@@ -2,69 +2,36 @@ import Link from 'next/link';
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaArrowRight, FaEnvelope, FaTags } from 'react-icons/fa';
 import { MdEventNote } from 'react-icons/md';
 
-// Sample news data (in production, this would come from the backend API)
-const newsArticles = [
-  {
-    slug: 'smart-meter-deployment-milestone',
-    title: 'Alpha Power Station Reaches 1,000 Smart Meter Deployment Milestone',
-    excerpt: 'Our IEC 62055-41 compliant prepaid meters are now serving communities across West Africa, transforming energy access and billing transparency.',
-    category: 'Projects',
-    date: '2026-06-10',
-    author: 'Dr. Emmanuel Kwesi',
-    image: 'gradient-blue',
-    featured: true,
-  },
-  {
-    slug: 'africa-proof-engineering-philosophy',
-    title: 'What is Africa-Proof Engineering? Our Design Philosophy Explained',
-    excerpt: 'Deep dive into the six principles that guide every project we build—rugged, repairable, and resilient systems designed for West African conditions.',
-    category: 'Thought Leadership',
-    date: '2026-06-05',
-    author: 'Ama Osei',
-    image: 'gradient-green',
-    featured: false,
-  },
-  {
-    slug: 'student-spotlight-kofi-mensah',
-    title: 'Student Spotlight: How Kofi Mensah Built a Real-Time Grid Monitoring System',
-    excerpt: 'Meet our software engineering intern who developed a breakthrough monitoring solution for unstable power grids during his first semester.',
-    category: 'Student Stories',
-    date: '2026-05-28',
-    author: 'Alpha Communications Team',
-    image: 'gradient-orange',
-    featured: false,
-  },
-  {
-    slug: 'partnership-atu-incubator',
-    title: 'Alpha Power Station Partners with ATU Incubator Hub for Technology Transfer',
-    excerpt: 'New collaboration to accelerate commercialization of locally designed energy solutions and provide student entrepreneurship support.',
-    category: 'Partnerships',
-    date: '2026-05-20',
-    author: 'Alpha Communications Team',
-    image: 'gradient-purple',
-    featured: false,
-  },
-  {
-    slug: 'e-waste-upcycling-impact',
-    title: 'From E-Waste to Innovation: 5,000 Components Recovered in Q2 2026',
-    excerpt: 'Our e-waste upcycling initiative is building sustainable supply chains while reducing environmental impact across the region.',
-    category: 'Sustainability',
-    date: '2026-05-15',
-    author: 'Yaw Boateng',
-    image: 'gradient-teal',
-    featured: false,
-  },
-  {
-    slug: 'hybrid-microgrid-case-study',
-    title: 'Case Study: Hybrid Solar Microgrid Brings Reliable Power to Rural Communities',
-    excerpt: 'Technical deep-dive into our latest microgrid deployment, featuring intelligent load management and climate-resilient design.',
-    category: 'Projects',
-    date: '2026-05-08',
-    author: 'Kwame Nkrumah',
-    image: 'gradient-yellow',
-    featured: false,
-  },
+interface NewsPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  coverImage: string | null;
+  featured: boolean;
+  publishedAt: string | null;
+}
+
+const GRADIENTS = [
+  'from-blue-500 to-blue-700',
+  'from-green-500 to-green-700',
+  'from-orange-500 to-orange-700',
+  'from-purple-500 to-purple-700',
+  'from-teal-500 to-teal-700',
+  'from-yellow-500 to-yellow-700',
 ];
+
+async function getNewsPosts(): Promise<NewsPost[]> {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+  try {
+    const response = await fetch(`${API_URL}/news`, { next: { revalidate: 60 } });
+    if (!response.ok) return [];
+    return response.json();
+  } catch {
+    return [];
+  }
+}
 
 const upcomingEvents = [
   {
@@ -92,7 +59,11 @@ const upcomingEvents = [
 
 const categories = ['All', 'Projects', 'Thought Leadership', 'Student Stories', 'Partnerships', 'Sustainability'];
 
-export default function NewsPage() {
+export default async function NewsPage() {
+  const newsArticles = await getNewsPosts();
+  const featuredArticles = newsArticles.filter((article) => article.featured);
+  const regularArticles = newsArticles.filter((article) => !article.featured);
+
   return (
     <>
       {/* Hero Section */}
@@ -129,71 +100,36 @@ export default function NewsPage() {
               ))}
             </div>
 
-            {/* Featured Article */}
-            {newsArticles.filter(article => article.featured).map((article) => (
-              <div key={article.slug} className="mb-12 border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
-                <div className={`h-64 bg-gradient-to-br ${
-                  article.image === 'gradient-blue' ? 'from-blue-500 to-blue-700' :
-                  article.image === 'gradient-green' ? 'from-green-500 to-green-700' :
-                  article.image === 'gradient-orange' ? 'from-orange-500 to-orange-700' :
-                  'from-purple-500 to-purple-700'
-                }`}></div>
-                <div className="p-8">
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
-                      Featured
-                    </span>
-                    <span className="text-blue-600 font-semibold">{article.category}</span>
-                    <span>{new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  </div>
-                  <h2 className="text-3xl font-bold mb-4">
-                    <Link href={`/news/${article.slug}`} className="hover:text-blue-600 transition">
-                      {article.title}
-                    </Link>
-                  </h2>
-                  <p className="text-gray-700 text-lg mb-4 leading-relaxed">
-                    {article.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      By <span className="font-semibold">{article.author}</span>
-                    </div>
-                    <Link
-                      href={`/news/${article.slug}`}
-                      className="text-blue-600 font-semibold hover:underline inline-flex items-center gap-1"
-                    >
-                      Read Full Article <FaArrowRight className="text-sm" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Regular Articles */}
-            <div className="space-y-6">
-              {newsArticles.filter(article => !article.featured).map((article) => (
-                <div key={article.slug} className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition">
-                  <div className="md:flex">
-                    <div className={`md:w-48 h-48 bg-gradient-to-br ${
-                      article.image === 'gradient-blue' ? 'from-blue-500 to-blue-700' :
-                      article.image === 'gradient-green' ? 'from-green-500 to-green-700' :
-                      article.image === 'gradient-orange' ? 'from-orange-500 to-orange-700' :
-                      article.image === 'gradient-purple' ? 'from-purple-500 to-purple-700' :
-                      article.image === 'gradient-teal' ? 'from-teal-500 to-teal-700' :
-                      article.image === 'gradient-yellow' ? 'from-yellow-500 to-yellow-700' :
-                      'from-gray-500 to-gray-700'
-                    }`}></div>
-                    <div className="p-6 flex-1">
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+            {newsArticles.length === 0 ? (
+              <p className="text-gray-500 py-12 text-center">
+                No news posts yet. Check back soon.
+              </p>
+            ) : (
+              <>
+                {/* Featured Articles */}
+                {featuredArticles.map((article) => (
+                  <div key={article.slug} className="mb-12 border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
+                    {article.coverImage ? (
+                      <img src={article.coverImage} alt={article.title} className="h-64 w-full object-cover" />
+                    ) : (
+                      <div className={`h-64 bg-gradient-to-br ${GRADIENTS[0]}`}></div>
+                    )}
+                    <div className="p-8">
+                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                        <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
+                          Featured
+                        </span>
                         <span className="text-blue-600 font-semibold">{article.category}</span>
-                        <span>{new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        {article.publishedAt && (
+                          <span>{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        )}
                       </div>
-                      <h3 className="text-xl font-bold mb-2">
+                      <h2 className="text-3xl font-bold mb-4">
                         <Link href={`/news/${article.slug}`} className="hover:text-blue-600 transition">
                           {article.title}
                         </Link>
-                      </h3>
-                      <p className="text-gray-700 mb-3">
+                      </h2>
+                      <p className="text-gray-700 text-lg mb-4 leading-relaxed">
                         {article.excerpt}
                       </p>
                       <div className="flex items-center justify-between">
@@ -202,32 +138,58 @@ export default function NewsPage() {
                         </div>
                         <Link
                           href={`/news/${article.slug}`}
-                          className="text-blue-600 font-semibold hover:underline text-sm inline-flex items-center gap-1"
+                          className="text-blue-600 font-semibold hover:underline inline-flex items-center gap-1"
                         >
-                          Read More <FaArrowRight className="text-xs" />
+                          Read Full Article <FaArrowRight className="text-sm" />
                         </Link>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
 
-            {/* Pagination */}
-            <div className="mt-12 flex justify-center gap-2">
-              <button className="px-4 py-2 border rounded-lg bg-blue-900 text-white font-semibold">
-                1
-              </button>
-              <button className="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
-                2
-              </button>
-              <button className="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
-                3
-              </button>
-              <button className="px-4 py-2 border rounded-lg hover:bg-gray-100 transition inline-flex items-center gap-1">
-                Next <FaArrowRight className="text-xs" />
-              </button>
-            </div>
+                {/* Regular Articles */}
+                <div className="space-y-6">
+                  {regularArticles.map((article, index) => (
+                    <div key={article.slug} className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition">
+                      <div className="md:flex">
+                        {article.coverImage ? (
+                          <img src={article.coverImage} alt={article.title} className="md:w-48 h-48 object-cover" />
+                        ) : (
+                          <div className={`md:w-48 h-48 bg-gradient-to-br ${GRADIENTS[index % GRADIENTS.length]}`}></div>
+                        )}
+                        <div className="p-6 flex-1">
+                          <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                            <span className="text-blue-600 font-semibold">{article.category}</span>
+                            {article.publishedAt && (
+                              <span>{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                            )}
+                          </div>
+                          <h3 className="text-xl font-bold mb-2">
+                            <Link href={`/news/${article.slug}`} className="hover:text-blue-600 transition">
+                              {article.title}
+                            </Link>
+                          </h3>
+                          <p className="text-gray-700 mb-3">
+                            {article.excerpt}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm text-gray-600">
+                              By <span className="font-semibold">{article.author}</span>
+                            </div>
+                            <Link
+                              href={`/news/${article.slug}`}
+                              className="text-blue-600 font-semibold hover:underline text-sm inline-flex items-center gap-1"
+                            >
+                              Read More <FaArrowRight className="text-xs" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Sidebar */}

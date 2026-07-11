@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ToastContainer } from '@/components/toast';
@@ -23,7 +23,6 @@ export default function SiteContentPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
   const [newContent, setNewContent] = useState<{
     key: string;
     value: string;
@@ -86,20 +85,15 @@ export default function SiteContentPage() {
     },
   });
 
-  const seedTeamMutation = useMutation({
-    mutationFn: async () => {
-      return await api.post('/admin/seed/team');
-    },
-    onSuccess: (response: any) => {
-      queryClient.invalidateQueries({ queryKey: ['site-content'] });
-      success(`Seeded ${response.data.created} items! (${response.data.skipped} already existed)`);
-      setIsSeeding(false);
-    },
-    onError: (err: any) => {
-      showError(err.response?.data?.error || 'Failed to seed content');
-      setIsSeeding(false);
-    },
-  });
+  const uploadImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'site-content');
+    const response = await api.post('/admin/media/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data.asset.url;
+  };
 
   const handleEdit = (content: SiteContent) => {
     setEditingId(content.id);
@@ -156,18 +150,6 @@ export default function SiteContentPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={() => {
-                if (confirm('Seed team page content? This will add 31 items (skip existing).')) {
-                  setIsSeeding(true);
-                  seedTeamMutation.mutate();
-                }
-              }}
-              disabled={isSeeding}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
-            >
-              {isSeeding ? '⏳ Seeding...' : '🌱 Seed Team Content'}
-            </button>
             <button
               onClick={() => setIsCreating(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -233,7 +215,40 @@ export default function SiteContentPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Value
               </label>
-              {(newContent.type === 'textarea' || newContent.type === 'html') ? (
+              {newContent.type === 'image' ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={newContent.value}
+                    onChange={(e) => setNewContent({ ...newContent, value: e.target.value })}
+                    placeholder="Image URL, or upload a file below"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  />
+                  <label className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm">
+                    <Upload className="h-4 w-4" />
+                    Upload Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadImage(file);
+                          setNewContent((prev) => ({ ...prev, value: url }));
+                          success('Image uploaded!');
+                        } catch {
+                          showError('Failed to upload image');
+                        }
+                      }}
+                    />
+                  </label>
+                  {newContent.value && (
+                    <img src={newContent.value} alt="Preview" className="h-24 rounded border border-gray-200 object-cover" />
+                  )}
+                </div>
+              ) : (newContent.type === 'textarea' || newContent.type === 'html') ? (
                 <textarea
                   value={newContent.value}
                   onChange={(e) => setNewContent({ ...newContent, value: e.target.value })}
@@ -300,7 +315,36 @@ export default function SiteContentPage() {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {editingId === content.id ? (
-                            content.type === 'textarea' || content.type === 'html' ? (
+                            content.type === 'image' ? (
+                              <div className="space-y-2">
+                                <input
+                                  type="text"
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded"
+                                />
+                                <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded cursor-pointer hover:bg-gray-200 transition text-xs">
+                                  <Upload className="h-3 w-3" />
+                                  Upload Image
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      try {
+                                        const url = await uploadImage(file);
+                                        setEditValue(url);
+                                        success('Image uploaded!');
+                                      } catch {
+                                        showError('Failed to upload image');
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
+                            ) : content.type === 'textarea' || content.type === 'html' ? (
                               <textarea
                                 value={editValue}
                                 onChange={(e) => setEditValue(e.target.value)}
@@ -315,6 +359,8 @@ export default function SiteContentPage() {
                                 className="w-full px-3 py-2 border border-gray-300 rounded"
                               />
                             )
+                          ) : content.type === 'image' && content.value ? (
+                            <img src={content.value} alt={content.key} className="h-12 rounded object-cover" />
                           ) : (
                             <div className="max-w-md truncate">{content.value}</div>
                           )}

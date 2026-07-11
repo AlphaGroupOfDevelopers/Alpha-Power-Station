@@ -2,13 +2,16 @@ import Link from 'next/link';
 import { FaShieldAlt, FaTools, FaBolt, FaWrench, FaGlobeAfrica, FaDollarSign, FaBullseye, FaSeedling, FaHandshake, FaBookOpen, FaLightbulb } from 'react-icons/fa';
 import { IoRocketSharp } from 'react-icons/io5';
 import VideoHero from '@/components/VideoHero';
+import { getSiteContent, pick } from '@/lib/site-content';
 
 export const metadata = {
   title: 'About Us | Alpha Power Station',
   description: 'Learn about our vision, mission, Africa-Proof Engineering philosophy, organizational structure, and values.',
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const content = await getSiteContent('about');
+
   return (
     <div className="bg-white">
       {/* Hero Section with Video Background */}
@@ -36,17 +39,21 @@ export default function AboutPage() {
               <div>
                 <h2 className="text-3xl font-bold mb-4 text-blue-900">Our Vision</h2>
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  To become the premier integrated engineering and technology hub in West Africa,
-                  pioneering locally designed, climate-resilient, and commercially viable systems 
-                  that solve critical infrastructure challenges across the continent.
+                  {pick(
+                    content,
+                    'about.vision',
+                    'To become the premier integrated engineering and technology hub in West Africa, pioneering locally designed, climate-resilient, and commercially viable systems that solve critical infrastructure challenges across the continent.'
+                  )}
                 </p>
               </div>
               <div>
                 <h2 className="text-3xl font-bold mb-4 text-blue-900">Our Mission</h2>
                 <p className="text-lg text-gray-700 leading-relaxed">
-                  To develop and deploy Africa-Proof Engineering solutions through the seamless
-                  integration of software and hardware expertise, fostering innovation, sustainability,
-                  and local economic development while training the next generation of African engineers.
+                  {pick(
+                    content,
+                    'about.mission',
+                    'To develop and deploy Africa-Proof Engineering solutions through the seamless integration of software and hardware expertise, fostering innovation, sustainability, and local economic development while training the next generation of African engineers.'
+                  )}
                 </p>
               </div>
             </div>
@@ -209,28 +216,17 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold mb-8 text-center">Our Story</h2>
             <div className="prose prose-lg max-w-none text-gray-700">
-              <p className="text-lg leading-relaxed mb-6">
-                Alpha Power Station emerged from a simple observation: West Africa's infrastructure 
-                challenges require more than imported solutions. They demand engineering approaches 
-                designed from the ground up for African contexts—systems that can thrive in our climate,
-                work with our power grids, and be maintained by our technicians.
-              </p>
-              <p className="text-lg leading-relaxed mb-6">
-                What began as small-scale projects in power metering and embedded systems evolved into 
-                a comprehensive engineering hub. By bringing together software developers and hardware 
-                engineers under one roof, we discovered the power of true integration—where firmware 
-                developers collaborate directly with circuit designers, and IoT platforms are built 
-                hand-in-hand with the devices they monitor.
-              </p>
-              <p className="text-lg leading-relaxed mb-6">
-                Key milestones in our journey include the development of our first IEC 62055-41 compliant 
-                smart prepaid meter, the establishment of our E-waste upcycling initiative, and the 
-                formation of partnerships with university incubators like the ATU Incubator Hub.
-              </p>
-              <p className="text-lg leading-relaxed">
-                Today, Alpha Power Station stands as a testament to what African engineering can achieve: 
-                innovative, sustainable, and impactful solutions that don't just work here—they thrive here.
-              </p>
+              {pick(
+                content,
+                'about.story',
+                "Alpha Power Station emerged from a simple observation: West Africa's infrastructure challenges require more than imported solutions.\n\nToday, Alpha Power Station stands as a testament to what African engineering can achieve: innovative, sustainable, and impactful solutions that don't just work here—they thrive here."
+              )
+                .split('\n\n')
+                .map((paragraph, index) => (
+                  <p key={index} className="text-lg leading-relaxed mb-6">
+                    {paragraph}
+                  </p>
+                ))}
             </div>
           </div>
         </div>
