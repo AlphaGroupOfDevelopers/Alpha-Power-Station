@@ -5,6 +5,41 @@ import Link from 'next/link';
 
 const DRAFT_STORAGE_KEY = 'aps-apply-draft';
 
+function ReviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-4 py-1 text-sm border-b border-gray-100 last:border-0">
+      <span className="text-gray-500">{label}</span>
+      <span className="text-gray-900 font-medium text-right">{value || '— not provided —'}</span>
+    </div>
+  );
+}
+
+function ReviewSection({
+  title,
+  onEdit,
+  children,
+}: {
+  title: string;
+  onEdit: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border border-gray-200 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-semibold">{title}</h3>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          Edit
+        </button>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export default function ApplyPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -41,16 +76,51 @@ export default function ApplyPage() {
     availability: '',
   });
 
-  const totalSteps = 5;
+  const totalSteps = 6;
+
+  const YEAR_OF_STUDY_LABELS: Record<string, string> = {
+    '1': 'Year 1',
+    '2': 'Year 2',
+    '3': 'Year 3',
+    '4': 'Year 4',
+    graduate: 'Recent Graduate',
+  };
+
+  const DIVISION_LABELS: Record<string, string> = {
+    AGD: 'AGD - Alpha Group of Developers',
+    AGEE: 'AGEE - Alpha Group of Electronics & Electricals',
+  };
+
+  const INTEREST_LABELS: Record<string, string> = {
+    embedded: 'Embedded Systems',
+    iot: 'IoT & Connectivity',
+    web: 'Web Development',
+    mobile: 'Mobile Development',
+    protocols: 'Protocol Implementation',
+    power: 'Power Electronics',
+    pcb: 'PCB Design',
+    renewable: 'Renewable Energy',
+    ewaste: 'E-Waste Upcycling',
+  };
+
+  const AVAILABILITY_LABELS: Record<string, string> = {
+    '20': '20 hours/week (Part-time)',
+    '30': '30 hours/week',
+    '40': '40 hours/week (Full-time)',
+  };
 
   // Restore an in-progress draft (e.g. after an accidental refresh) once on mount.
+  // Resume/cover-letter File objects can never survive a reload, so the restored
+  // step is capped at the file-upload step (4) rather than wherever the user left
+  // off — otherwise they'd land past it with no file attached and no visible way
+  // to notice, since the file input only renders on step 4.
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(DRAFT_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.formData) setFormData(parsed.formData);
-        if (parsed.currentStep) setCurrentStep(parsed.currentStep);
+        if (parsed.currentStep) setCurrentStep(Math.min(parsed.currentStep, 4));
       }
     } catch {
       // ignore corrupt/unavailable storage
@@ -107,6 +177,7 @@ export default function ApplyPage() {
     if (!resumeFile) {
       setSubmitStatus('error');
       setSubmitError('Please upload your resume/CV before submitting.');
+      setCurrentStep(4);
       return;
     }
 
@@ -208,7 +279,7 @@ export default function ApplyPage() {
           {/* Progress Bar */}
           <div className="bg-white rounded-lg shadow-md p-8 mb-8">
             <div className="flex justify-between items-center mb-4">
-              {[1, 2, 3, 4, 5].map((step) => (
+              {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
                 <div key={step} className="flex-1">
                   <div className="flex items-center">
                     <div
@@ -220,7 +291,7 @@ export default function ApplyPage() {
                     >
                       {step}
                     </div>
-                    {step < 5 && (
+                    {step < totalSteps && (
                       <div
                         className={`flex-1 h-1 mx-2 ${
                           step < currentStep ? 'bg-blue-600' : 'bg-gray-300'
@@ -454,7 +525,6 @@ export default function ApplyPage() {
                             <option value="power">Power Electronics</option>
                             <option value="pcb">PCB Design</option>
                             <option value="renewable">Renewable Energy</option>
-                            <option value="testing">Testing & Certification</option>
                             <option value="ewaste">E-Waste Upcycling</option>
                           </>
                         )}
@@ -559,6 +629,10 @@ export default function ApplyPage() {
                         <p className="mt-1 text-sm text-gray-600">Selected: {resumeFile.name}</p>
                       )}
                       <p className="mt-1 text-sm text-gray-500">PDF, DOC, or DOCX up to 10MB</p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        If you refreshed this page, please reattach your resume — file selections
+                        aren&apos;t saved automatically.
+                      </p>
                     </div>
 
                     <div>
@@ -634,13 +708,89 @@ export default function ApplyPage() {
                     </div>
 
                     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-sm">
-                      <p className="font-semibold mb-2">Before submitting:</p>
-                      <ul className="list-disc list-inside space-y-1 text-gray-700">
-                        <li>Review all your information for accuracy</li>
-                        <li>Ensure your contact details are correct</li>
-                        <li>Check that you've answered all required fields</li>
-                      </ul>
+                      <p className="text-gray-700">
+                        Almost there — clicking "Next" will show you a full review of your
+                        application before it's submitted.
+                      </p>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 6: Review & Submit */}
+              {currentStep === 6 && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Review & Submit</h2>
+                  <p className="text-gray-600 mb-6">
+                    Please check everything below before submitting. Use "Edit" to jump back to
+                    any section.
+                  </p>
+                  <div className="space-y-4">
+                    <ReviewSection title="Personal Information" onEdit={() => setCurrentStep(1)}>
+                      <ReviewRow label="Name" value={`${formData.firstName} ${formData.lastName}`.trim()} />
+                      <ReviewRow label="Email" value={formData.email} />
+                      <ReviewRow label="Phone" value={formData.phone} />
+                    </ReviewSection>
+
+                    <ReviewSection title="Academic Information" onEdit={() => setCurrentStep(2)}>
+                      <ReviewRow label="University" value={formData.university} />
+                      <ReviewRow label="Program" value={formData.program} />
+                      <ReviewRow
+                        label="Year of Study"
+                        value={YEAR_OF_STUDY_LABELS[formData.yearOfStudy] || formData.yearOfStudy}
+                      />
+                      {formData.yearOfStudy !== 'graduate' && (
+                        <ReviewRow label="Expected Graduation" value={formData.expectedGraduation} />
+                      )}
+                    </ReviewSection>
+
+                    <ReviewSection title="Division & Interests" onEdit={() => setCurrentStep(3)}>
+                      <ReviewRow
+                        label="Division"
+                        value={DIVISION_LABELS[formData.division] || formData.division}
+                      />
+                      <ReviewRow
+                        label="Primary Interest"
+                        value={INTEREST_LABELS[formData.primaryInterest] || formData.primaryInterest}
+                      />
+                      <ReviewRow label="Secondary Interest" value={formData.secondaryInterest} />
+                    </ReviewSection>
+
+                    <ReviewSection title="Experience & Portfolio" onEdit={() => setCurrentStep(4)}>
+                      <ReviewRow label="Relevant Courses" value={formData.relevantCourses} />
+                      <ReviewRow label="Previous Projects" value={formData.projects} />
+                      <ReviewRow label="GitHub Profile" value={formData.githubUrl} />
+                      <ReviewRow label="Portfolio/Website" value={formData.portfolioUrl} />
+                      {resumeFile ? (
+                        <ReviewRow label="Resume/CV" value={resumeFile.name} />
+                      ) : (
+                        <div className="flex justify-between gap-4 py-1 text-sm">
+                          <span className="text-red-600 font-medium">
+                            No resume attached — required
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setCurrentStep(4)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            Attach now
+                          </button>
+                        </div>
+                      )}
+                      <ReviewRow
+                        label="Cover Letter"
+                        value={coverLetterFile ? coverLetterFile.name : ''}
+                      />
+                    </ReviewSection>
+
+                    <ReviewSection title="Motivation & Availability" onEdit={() => setCurrentStep(5)}>
+                      <ReviewRow label="Why Apply" value={formData.whyApply} />
+                      <ReviewRow label="What You'll Contribute" value={formData.whatContribute} />
+                      <ReviewRow
+                        label="Availability"
+                        value={AVAILABILITY_LABELS[formData.availability] || formData.availability}
+                      />
+                    </ReviewSection>
                   </div>
                 </div>
               )}
@@ -662,6 +812,7 @@ export default function ApplyPage() {
 
                 {currentStep < totalSteps ? (
                   <button
+                    key="next-button"
                     type="button"
                     onClick={nextStep}
                     className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
@@ -670,6 +821,7 @@ export default function ApplyPage() {
                   </button>
                 ) : (
                   <button
+                    key="submit-button"
                     type="submit"
                     disabled={submitStatus === 'submitting'}
                     className="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
