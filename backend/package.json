@@ -13,7 +13,8 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
     "create-admin": "tsx src/scripts/create-admin.ts",
-    "seed:site-content": "tsx src/scripts/seed-site-content.ts"
+    "seed:site-content": "tsx src/scripts/seed-site-content.ts",
+    "seed:team-members": "tsx src/scripts/seed-team-members.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
