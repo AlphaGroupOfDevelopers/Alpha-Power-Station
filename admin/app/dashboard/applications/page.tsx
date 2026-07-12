@@ -26,8 +26,8 @@ export default function ApplicationsPage() {
   const { data: applications, isLoading } = useQuery({
     queryKey: ['applications'],
     queryFn: async () => {
-      const response = await api.get<Application[]>('/admin/applications');
-      return response.data;
+      const response = await api.get<{ applications: Application[] }>('/admin/applications');
+      return response.data.applications;
     },
   });
 
