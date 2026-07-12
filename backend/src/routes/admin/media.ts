@@ -5,6 +5,7 @@ import { uploadSingle, uploadMultiple } from '../../middleware/upload';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
+import { absoluteUploadUrl } from '../../utils/url';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -44,20 +45,20 @@ router.post(
       const file = req.file;
       const folder = req.body.folder || 'general';
       
-      // Generate URL (adjust based on your hosting)
-      const url = `/uploads/${file.filename}`;
-      
+      // Generate absolute URL so it resolves correctly from other origins (e.g. admin dashboard)
+      const url = absoluteUploadUrl(req, file.filename);
+
       // Create thumbnail for images
       let thumbnail = null;
       if (file.mimetype.startsWith('image/')) {
         const thumbnailFilename = `thumb-${file.filename}`;
         const thumbnailPath = path.join(process.cwd(), 'uploads', thumbnailFilename);
-        
+
         await sharp(file.path)
           .resize(300, 300, { fit: 'cover' })
           .toFile(thumbnailPath);
-        
-        thumbnail = `/uploads/${thumbnailFilename}`;
+
+        thumbnail = absoluteUploadUrl(req, thumbnailFilename);
       }
 
       // Save to database
@@ -100,19 +101,19 @@ router.post(
       const assets = [];
 
       for (const file of req.files) {
-        const url = `/uploads/${file.filename}`;
-        
+        const url = absoluteUploadUrl(req, file.filename);
+
         // Create thumbnail for images
         let thumbnail = null;
         if (file.mimetype.startsWith('image/')) {
           const thumbnailFilename = `thumb-${file.filename}`;
           const thumbnailPath = path.join(process.cwd(), 'uploads', thumbnailFilename);
-          
+
           await sharp(file.path)
             .resize(300, 300, { fit: 'cover' })
             .toFile(thumbnailPath);
-          
-          thumbnail = `/uploads/${thumbnailFilename}`;
+
+          thumbnail = absoluteUploadUrl(req, thumbnailFilename);
         }
 
         const asset = await prisma.media_assets.create({

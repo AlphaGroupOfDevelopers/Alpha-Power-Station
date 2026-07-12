@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+const DRAFT_STORAGE_KEY = 'aps-apply-draft';
 
 export default function ApplyPage() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -40,6 +42,38 @@ export default function ApplyPage() {
   });
 
   const totalSteps = 5;
+
+  // Restore an in-progress draft (e.g. after an accidental refresh) once on mount.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(DRAFT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.formData) setFormData(parsed.formData);
+        if (parsed.currentStep) setCurrentStep(parsed.currentStep);
+      }
+    } catch {
+      // ignore corrupt/unavailable storage
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({ formData, currentStep })
+      );
+    } catch {
+      // ignore unavailable storage (e.g. private browsing quota)
+    }
+  }, [formData, currentStep]);
+
+  // Recent graduates don't have a future graduation date to give.
+  useEffect(() => {
+    if (formData.yearOfStudy === 'graduate' && formData.expectedGraduation) {
+      setFormData((prev) => ({ ...prev, expectedGraduation: '' }));
+    }
+  }, [formData.yearOfStudy]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -102,6 +136,11 @@ export default function ApplyPage() {
       }
 
       setSubmitStatus('success');
+      try {
+        sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+      } catch {
+        // ignore unavailable storage
+      }
     } catch (error: any) {
       setSubmitStatus('error');
       setSubmitError(error.message || 'Failed to submit application. Please try again.');
@@ -143,6 +182,21 @@ export default function ApplyPage() {
             </Link>
             <h1 className="text-4xl font-bold mb-2">Application Portal</h1>
             <p className="text-gray-600">Join Alpha Power Station</p>
+          </div>
+
+          {/* Org context blurb */}
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 mb-8">
+            <h2 className="text-lg font-semibold mb-2">What is Alpha Power Station?</h2>
+            <p className="text-gray-700 text-sm">
+              Alpha Power Station is a student innovation program built around two divisions:
+              AGD (Alpha Group of Developers), focused on software and embedded systems, and
+              AGEE (Alpha Group of Electronics & Electricals), focused on power systems and
+              hardware engineering. Members get hands-on project experience and mentorship in
+              their chosen division.
+            </p>
+            <Link href="/about" className="inline-block mt-3 text-sm font-semibold text-blue-600 hover:underline">
+              Learn more about us →
+            </Link>
           </div>
 
           {submitStatus === 'error' && (
@@ -305,18 +359,20 @@ export default function ApplyPage() {
                           <option value="graduate">Recent Graduate</option>
                         </select>
                       </div>
-                      <div>
-                        <label className="block text-sm font-semibold mb-2">
-                          Expected Graduation
-                        </label>
-                        <input
-                          type="month"
-                          name="expectedGraduation"
-                          value={formData.expectedGraduation}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                        />
-                      </div>
+                      {formData.yearOfStudy !== 'graduate' && (
+                        <div>
+                          <label className="block text-sm font-semibold mb-2">
+                            Expected Graduation
+                          </label>
+                          <input
+                            type="month"
+                            name="expectedGraduation"
+                            value={formData.expectedGraduation}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -622,6 +678,12 @@ export default function ApplyPage() {
                   </button>
                 )}
               </div>
+              {submitStatus === 'submitting' && (
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  This can take up to a minute if the server has been idle — please don&apos;t
+                  refresh or close this page.
+                </p>
+              )}
             </div>
           </form>
 

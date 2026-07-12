@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
 import { uploadApplicationFiles } from '../middleware/upload';
+import { absoluteUploadUrl } from '../utils/url';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -78,8 +79,8 @@ router.post(
           whyApply,
           whatContribute,
           availability,
-          resume: resumeFile ? `/uploads/${resumeFile.filename}` : undefined,
-          coverLetter: coverLetterFile ? `/uploads/${coverLetterFile.filename}` : undefined,
+          resume: resumeFile ? absoluteUploadUrl(req, resumeFile.filename) : undefined,
+          coverLetter: coverLetterFile ? absoluteUploadUrl(req, coverLetterFile.filename) : undefined,
         },
       });
 

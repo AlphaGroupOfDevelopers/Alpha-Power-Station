@@ -1,5 +1,6 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { body, validationResult } from 'express-validator';
 import { authenticateToken, requireRole } from '../../middleware/auth';
 
 const router = Router();
@@ -58,7 +59,17 @@ router.get('/:id', async (req, res) => {
 router.patch(
   '/:id/status',
   requireRole('admin', 'editor'),
-  async (req, res) => {
+  [
+    body('status')
+      .isIn(['pending', 'reviewed', 'accepted', 'rejected'])
+      .withMessage('Invalid status'),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
       const { status, reviewNotes } = req.body;
 
@@ -96,54 +107,6 @@ router.delete(
     } catch (error) {
       console.error('Delete application error:', error);
       res.status(500).json({ error: 'Failed to delete application' });
-    }
-  }
-);
-
-// Get contact inquiries
-router.get('/contact/inquiries', async (req, res) => {
-  try {
-    const { status, type } = req.query;
-
-    const inquiries = await prisma.contact_inquiries.findMany({
-      where: {
-        ...(status && { status: status as string }),
-        ...(type && { type: type as string }),
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    res.json(inquiries);
-  } catch (error) {
-    console.error('Get inquiries error:', error);
-    res.status(500).json({ error: 'Failed to fetch inquiries' });
-  }
-});
-
-// Update inquiry status
-router.patch(
-  '/contact/:id/status',
-  requireRole('admin', 'editor'),
-  async (req, res) => {
-    try {
-      const { status, response } = req.body;
-
-      const inquiry = await prisma.contact_inquiries.update({
-        where: { id: req.params.id },
-        data: {
-          status,
-          ...(response && { response }),
-          ...(status === 'responded' && { respondedAt: new Date() }),
-        },
-      });
-
-      res.json({
-        message: 'Inquiry status updated successfully',
-        inquiry,
-      });
-    } catch (error) {
-      console.error('Update inquiry status error:', error);
-      res.status(500).json({ error: 'Failed to update inquiry status' });
     }
   }
 );
